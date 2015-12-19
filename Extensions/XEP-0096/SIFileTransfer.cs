@@ -268,13 +268,10 @@ namespace Sharp.Xmpp.Extensions {
 			SISession session = GetSession(sid, from,
 				to);
 			if (session == null) {
-				throw new ArgumentException("The specified transfer instance does not " +
-					"represent an active data-transfer operation.");
+				throw new ArgumentException( String.Format("The specified transfer instance does not " +
+					"represent an active data-transfer operation.:sid {0}, file {1}, from {2}, to {3}", session.Sid, session.Stream.ToString(), session.From, session.To));
 			}
-            //#if DEBUG
-            //System.Diagnostics.Debug.WriteLine("SI File Transfer CancelFileTransfer, sid {0}, file {1}, from {2}, to {3}", session.Sid, session.Stream.ToString(), session.From, session.To);
-            //#endif
-
+           
 			session.Extension.CancelTransfer(session);
 		}
 

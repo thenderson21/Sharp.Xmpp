@@ -74,7 +74,7 @@ namespace Sharp.Xmpp.Extensions {
 					// If response is an error element, send back an error response.
 					im.IqResponse(response.Name == "error" ? IqType.Error : IqType.Result,
 						stanza.Id, stanza.From, im.Jid, response);
-				} catch (Exception) {
+				} catch (Exception ex) {
 					// Send back an error response in case the callback method threw
 					// an exception.
 					im.IqError(stanza, ErrorType.Cancel, ErrorCondition.ServiceUnavailable);

@@ -159,7 +159,7 @@ namespace Sharp.Xmpp.Core.Sasl.Mechanisms {
 			string[] directives = new string[] {
 				// We don't use UTF-8 in the current implementation.
 				//"charset=utf-8",
-				"username=" + Dquote(Username),
+				"username=" + UsernameBackslashEscapeXep106(Dquote(Username)),
 				"realm=" + Dquote(fields["realm"]),
 				"nonce="+ Dquote(fields["nonce"]),
 				"nc=00000001",
@@ -268,6 +268,20 @@ namespace Sharp.Xmpp.Core.Sasl.Mechanisms {
 		private static string Dquote(string s) {
 			return "\"" + s + "\"";
 		}
+
+        /// <summary>
+        /// Add an additional backslash, if any backslashes are found in the username
+        /// For XEP106 jid nodes, Openfire seems that it needs to escape the backslash
+        /// within the user name. See discussion at https://community.igniterealtime.org/message/254096#254096
+        /// It is not clear if this is an Openfire bug or a Sharp.Xmpp issue, so please treat this
+        /// as experimental
+        /// </summary>
+        /// <param name="s">String to escape in order to resolve https://community.igniterealtime.org/message/254096#254096 issue</param>
+        /// <returns>String with backslashes escaped</returns>
+        private static string UsernameBackslashEscapeXep106(string s)
+        {
+            return s.Replace("\\", "\\\\");
+        }
 
 		/// <summary>
 		/// Generates a random cnonce-value which is a "client-specified data string

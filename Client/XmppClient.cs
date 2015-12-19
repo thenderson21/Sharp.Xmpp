@@ -916,10 +916,12 @@ namespace Sharp.Xmpp.Client {
         /// <param name="str">The payload string to provide to the Request</param>
         /// <param name="callback">The callback method to call after the Request Result has being received. Included the serialised dat
         /// of the answer to the request</param>
-        public void RequestCustomIq(Jid jid, string str)
+        public void RequestCustomIq(Jid jid, string str, Action callback=null)
         {
             AssertValid();
-            cusiqextension.RequestCustomIqAsync(jid, str);
+            if (callback==null) cusiqextension.RequestCustomIq(jid, str); 
+            else 
+                 cusiqextension.RequestCustomIqAsync(jid, str, callback); 
         }
 
 		/// <summary>
