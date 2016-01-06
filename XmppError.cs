@@ -205,9 +205,9 @@ namespace Sharp.Xmpp
             string s = condition.ToString();
             for (int i = 0; i < s.Length; i++)
             {
-                if (Char.IsUpper(s, i) && i > 0)
+                if (char.IsUpper(s, i) && i > 0)
                     b.Append('-');
-                b.Append(Char.ToLower(s[i]));
+                b.Append(char.ToLower(s[i]));
             }
             return b.ToString();
         }

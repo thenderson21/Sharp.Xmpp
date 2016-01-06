@@ -172,10 +172,10 @@ namespace Sharp.Xmpp.Extensions
             // Parse 'tune' element.
             int length = 0;
             if (tune["length"] != null)
-                length = Int32.Parse(tune["length"].InnerText);
+                length = int.Parse(tune["length"].InnerText);
             int rating = 0;
             if (tune["rating"] != null)
-                rating = Int32.Parse(tune["rating"].InnerText);
+                rating = int.Parse(tune["rating"].InnerText);
             TuneInformation info = new TuneInformation(
                 GetField(tune, "title"), GetField(tune, "artist"), GetField(tune, "track"),
                 length, rating, GetField(tune, "source"), GetField(tune, "uri"));

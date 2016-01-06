@@ -386,7 +386,7 @@ namespace Sharp.Xmpp.Extensions
                     string jid = e.GetAttribute("jid"),
                         host = e.GetAttribute("host"), p = e.GetAttribute("port");
                     // The 'port' attribute is optional.
-                    int port = String.IsNullOrEmpty(p) ? defaultPort : Int32.Parse(p);
+                    int port = String.IsNullOrEmpty(p) ? defaultPort : int.Parse(p);
                     list.Add(new Streamhost(jid, host, port));
                 }
                 catch

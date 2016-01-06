@@ -349,7 +349,7 @@ namespace Sharp.Xmpp.Extensions
                 var file = si["file"];
                 string desc = file["desc"] != null ? file["desc"].InnerText : null,
                     name = file.GetAttribute("name");
-                int size = Int32.Parse(file.GetAttribute("size"));
+                int size = int.Parse(file.GetAttribute("size"));
                 FileTransfer transfer = new FileTransfer(from, im.Jid, name, size,
                     sid, desc);
                 string savePath = TransferRequest.Invoke(transfer);

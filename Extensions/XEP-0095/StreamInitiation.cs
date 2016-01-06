@@ -90,6 +90,7 @@ namespace Sharp.Xmpp.Extensions
                 }
                 catch (Exception ex)
                 {
+                    System.Diagnostics.Debug.WriteLine("Exception was raised during Stream Initiation " + ex.ToString());
                     // Send back an error response in case the callback method threw
                     // an exception.
                     im.IqError(stanza, ErrorType.Cancel, ErrorCondition.ServiceUnavailable);

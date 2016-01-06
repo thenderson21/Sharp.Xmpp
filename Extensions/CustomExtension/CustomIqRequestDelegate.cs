@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Sharp.Xmpp.Extensions
+﻿namespace Sharp.Xmpp.Extensions
 {
     /// <summary>
     /// Invoked when a CustomIqRequest is made.

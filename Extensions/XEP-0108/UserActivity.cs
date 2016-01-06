@@ -167,9 +167,9 @@ namespace Sharp.Xmpp.Extensions
             string s = activity.ToString();
             for (int i = 0; i < s.Length; i++)
             {
-                if (Char.IsUpper(s, i) && i > 0)
+                if (char.IsUpper(s, i) && i > 0)
                     b.Append('_');
-                b.Append(Char.ToLower(s[i]));
+                b.Append(char.ToLower(s[i]));
             }
             return b.ToString();
         }
@@ -186,9 +186,9 @@ namespace Sharp.Xmpp.Extensions
             string s = activity.ToString();
             for (int i = 0; i < s.Length; i++)
             {
-                if (Char.IsUpper(s, i) && i > 0)
+                if (char.IsUpper(s, i) && i > 0)
                     b.Append('_');
-                b.Append(Char.ToLower(s[i]));
+                b.Append(char.ToLower(s[i]));
             }
             return b.ToString();
         }
