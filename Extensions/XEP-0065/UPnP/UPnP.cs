@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Sockets;
-using System.Runtime.InteropServices;
-#if WINDOWSPLATFORM
+﻿#if WINDOWSPLATFORM
 using UPNPLib;
 #endif
 
 namespace Sharp.Xmpp.Extensions.Upnp
 {
-
 #if WINDOWSPLATFORM
 
 	/// <summary>
@@ -350,13 +344,13 @@ namespace Sharp.Xmpp.Extensions.Upnp
 		/// until the search has been completed.</param>
 		/// <returns>An enumerable collection of discovered UPnP devices.</returns>
 		/// <exception cref="InvalidOperationException">An error occurred while
-		/// performing an SSDP search-operation.</exception> 
+		/// performing an SSDP search-operation.</exception>
 		/// <remarks>
 		/// A full UPnP search can take 9 seconds or longer;
-		/// 
+		///
 		/// Possible values for the searchTarget parameter include:
 		///  * ssdp:all (searches for all devices and services)
-		///  * ssdp:rootdevice (searches for root devices only) 
+		///  * ssdp:rootdevice (searches for root devices only)
 		/// For details on all possible values for the searchTarget parameter, refer
 		/// to the 'UPnP Device Architecture 1.1' document, page 33.
 		/// </remarks>

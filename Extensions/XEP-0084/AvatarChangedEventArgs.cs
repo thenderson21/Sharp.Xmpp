@@ -1,14 +1,18 @@
 ﻿using System;
+
 #if WINDOWSPLATFORM
 using System.Drawing;
 #endif
-namespace Sharp.Xmpp.Extensions {
-	/// <summary>
-	/// Provides data for the AvatarChanged event.
-	/// </summary>
-	[Serializable]
-	public class AvatarChangedEventArgs : EventArgs {
-        #if WINDOWSPLATFORM
+
+namespace Sharp.Xmpp.Extensions
+{
+    /// <summary>
+    /// Provides data for the AvatarChanged event.
+    /// </summary>
+    [Serializable]
+    public class AvatarChangedEventArgs : EventArgs
+    {
+#if WINDOWSPLATFORM
 
 		/// <summary>
 		/// The JID of the XMPP entity that published the avatar information.
@@ -60,5 +64,5 @@ namespace Sharp.Xmpp.Extensions {
 			Avatar = avatar;
 		}
 #endif
-	}
+    }
 }

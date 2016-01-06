@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-#if WINDOWSPLATFORM
+﻿#if WINDOWSPLATFORM
 using UPNPLib;
 #endif
 
-namespace Sharp.Xmpp.Extensions.Upnp {
+namespace Sharp.Xmpp.Extensions.Upnp
+{
 #if WINDOWSPLATFORM
 	/// <summary>
 	/// Represents a class for collecting UPnP-Discovery results.
@@ -21,7 +20,7 @@ namespace Sharp.Xmpp.Extensions.Upnp {
 		/// Set once UPnP-Discovery has been completed.
 		/// </summary>
 		ManualResetEvent searchCompleted = new ManualResetEvent(false);
-		
+
 		/// <summary>
 		/// Determines whether the UPnP-Discovery has been completed.
 		/// </summary>

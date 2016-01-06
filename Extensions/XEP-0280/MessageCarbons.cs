@@ -2,15 +2,12 @@
 using Sharp.Xmpp.Im;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sharp.Xmpp.Extensions
 {
-    internal class MessageCarbons: XmppExtension
+    internal class MessageCarbons : XmppExtension
     {
-        static readonly string[] _namespaces = { "urn:xmpp:carbons:2" };
+        private static readonly string[] _namespaces = { "urn:xmpp:carbons:2" };
         private EntityCapabilities ecapa;
 
         public override IEnumerable<string> Namespaces

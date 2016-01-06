@@ -1,16 +1,11 @@
-﻿using Sharp.Xmpp.Im;
-using System;
-using System.Collections.Generic;
-#if WINDOWSPLATFORM
+﻿#if WINDOWSPLATFORM
 using System.Drawing;
 using System.Drawing.Imaging;
 #endif
-using System.IO;
-using System.Security.Cryptography;
-using System.Xml;
 
-namespace Sharp.Xmpp.Extensions {
-    #if WINDOWSPLATFORM
+namespace Sharp.Xmpp.Extensions
+{
+#if WINDOWSPLATFORM
 
 	/// <summary>
 	/// Implements the 'User Avatar' extension as defined in XEP-0084.
