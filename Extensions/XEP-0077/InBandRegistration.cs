@@ -122,7 +122,7 @@ namespace Sharp.Xmpp.Extensions
         }
 
         /// <summary>
-        /// Changes the current password of the specified new password.
+        /// Changes the current password to the specified new password.
         /// </summary>
         /// <param name="newPassword">The new password to use.</param>
         /// <exception cref="ArgumentNullException">The newPassword parameter
