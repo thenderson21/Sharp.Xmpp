@@ -1715,17 +1715,15 @@ namespace Sharp.Xmpp.Im
 
         /// <summary>
         /// Processes a presence stanza containing a subscription request.
+        /// It does not automatically accept or reject a subscription.
+        /// Explicit invocation of ApproveSubscriptionRequest(presence.From) or
+        /// RefuseSubscriptionRequest(presence.From) must take placed
         /// </summary>
         /// <param name="presence">The presence stanza to process.</param>
         private void ProcessSubscriptionRequest(Presence presence)
         {
-            /////New Addition in order to be able to handle it via an event
             if (SubscriptionRequest != null)
                 SubscriptionRequest.Invoke(presence.From);
-            //        == true)
-            //    ApproveSubscriptionRequest(presence.From);
-            //else
-            //    RefuseSubscriptionRequest(presence.From);
         }
 
         /// <summary>
