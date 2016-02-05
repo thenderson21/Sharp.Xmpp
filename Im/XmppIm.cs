@@ -18,22 +18,21 @@ namespace Sharp.Xmpp.Im
     /// <remarks>For implementation details, refer to RFC 3921.</remarks>
     public class XmppIm : IDisposable
     {
-
-        bool useRoster = true;
+        private bool retrieveRoster = true;
 
         /// <summary>
         /// If false the connection will not automatically retrieve the rooster
         /// </summary>
-        public bool UseRoster
+        public bool RetrieveRoster
         {
             get
             {
-                return useRoster;
+                return retrieveRoster;
             }
 
             set
             {
-                useRoster = value;
+                retrieveRoster = value;
             }
         }
 
@@ -130,7 +129,7 @@ namespace Sharp.Xmpp.Im
         }
 
         /// <summary>
-        /// If true the session will be TLS/SSL-encrypted if the server supports it.
+        /// The TLS/SSL encryption mode used, provided that the server supports it
         /// </summary>
         public TLSMode Tls
         {
@@ -264,7 +263,7 @@ namespace Sharp.Xmpp.Im
         /// </summary>
         public event EventHandler<StatusEventArgs> Status;
 
-        /// <summary>
+        /// <summary>se
         /// The event that is raised when a chat message is received.
         /// </summary>
         public event EventHandler<MessageEventArgs> Message;
@@ -395,9 +394,8 @@ namespace Sharp.Xmpp.Im
                 // Establish a session (Refer to RFC 3921, Section 3. Session Establishment).
                 EstablishSession();
 
-
                 //If roster is disabled don't send it nor the presence
-                if (useRoster)
+                if (retrieveRoster)
                 {
                     // Retrieve user's roster as recommended (Refer to RFC 3921, Section 7.3).
                     Roster roster = GetRoster();
@@ -1356,7 +1354,7 @@ namespace Sharp.Xmpp.Im
                 return extensions;
             }
         }
-        
+
         /// <summary>
         /// Sends the specified presence stanza to the server.
         /// </summary>
@@ -1386,7 +1384,7 @@ namespace Sharp.Xmpp.Im
         /// </summary>
         public void SendPresence()
         {
-            SendPresence(new Presence());            
+            SendPresence(new Presence());
         }
 
         /// <summary>

@@ -24,10 +24,9 @@ namespace Sharp.Xmpp.Client
         /// </summary>
         public bool UseRooster
         {
-            get { return im.UseRoster; }
-            set { im.UseRoster = value; }
+            get { return im.RetrieveRoster; }
+            set { im.RetrieveRoster = value; }
         }
-        
 
         /// <summary>
         /// True if the instance has been disposed of.
@@ -166,6 +165,10 @@ namespace Sharp.Xmpp.Client
         /// Provides the Message Carbons extension
         /// </summary>
         private MessageCarbons messageCarbons;
+        private string _defaultNet;
+        private string _defaultUser;
+        private string p1;
+        private bool p2;
 
         /// <summary>
         /// The hostname of the XMPP server to connect to.
@@ -603,6 +606,7 @@ namespace Sharp.Xmpp.Client
             }
         }
 
+       
         /// <summary>
         /// Initializes a new instance of the XmppClient class.
         /// </summary>

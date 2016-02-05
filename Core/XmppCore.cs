@@ -237,7 +237,7 @@ namespace Sharp.Xmpp.Core
         }
 
         /// <summary>
-        /// If true the session will be TLS/SSL-encrypted if the server supports it.
+        /// Enum defining the TLS/SSL Mode.
         /// </summary>
         public TLSMode Tls
         {
@@ -375,7 +375,7 @@ namespace Sharp.Xmpp.Core
         /// string.</exception>
         /// <exception cref="ArgumentOutOfRangeException">The value of the port parameter
         /// is not a valid port number.</exception>
-        public XmppCore(string hostname, int port = 5222, TLSMode tls =  TLSMode.StartTLS,
+        public XmppCore(string hostname, int port = 5222, TLSMode tls = TLSMode.StartTLS,
             RemoteCertificateValidationCallback validate = null)
         {
             moveNextSrvDNS(hostname);
@@ -479,6 +479,10 @@ namespace Sharp.Xmpp.Core
                     var ssl = new SslStream(client.GetStream());
                     ssl.AuthenticateAsClient(Hostname);
                     stream = ssl;
+                }
+                else
+                {
+                    stream = client.GetStream();
                 }
 
                 // Sets up the connection which includes TLS and possibly SASL negotiation.
@@ -1360,10 +1364,12 @@ namespace Sharp.Xmpp.Core
         /// No TLS
         /// </summary>
         None,
+
         /// <summary>
         /// Use extension STARTTLS
         /// </summary>
         StartTLS,
+
         /// <summary>
         /// Use Ssl socket
         /// </summary>
