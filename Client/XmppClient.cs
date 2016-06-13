@@ -765,11 +765,11 @@ namespace Sharp.Xmpp.Client
         /// the XMPP server.</exception>
         /// <exception cref="ObjectDisposedException">The XmppClient object has been
         /// disposed.</exception>
-        public void SendMessage(Message message)
+        public void SendMessage(IMessage message)
         {
             AssertValid();
             message.ThrowIfNull("message");
-            im.SendMessage(message);
+            im.SendMessage(message.ToMessage());
         }
 
         /// <summary>

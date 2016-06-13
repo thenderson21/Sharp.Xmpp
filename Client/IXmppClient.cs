@@ -293,7 +293,7 @@ namespace Sharp.Xmpp.Client
         /// the XMPP server.</exception>
         /// <exception cref="ObjectDisposedException">The XmppClient object has been
         /// disposed.</exception>
-        void SendMessage(Message message);
+        void SendMessage(IMessage message);
 
         /// <summary>
         /// Sets the availability status.
