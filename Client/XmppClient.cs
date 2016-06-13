@@ -327,7 +327,7 @@ namespace Sharp.Xmpp.Client
         /// <summary>
         /// Contains settings for configuring file-transfer options.
         /// </summary>
-        public FileTransferSettings FileTransferSettings
+        public IFileTransferSettings FileTransferSettings
         {
             get;
             private set;
@@ -1227,7 +1227,7 @@ namespace Sharp.Xmpp.Client
         /// <exception cref="ObjectDisposedException">The XmppClient object has been
         /// disposed.</exception>
         public string InitiateFileTransfer(Jid to, string path,
-            string description = null, Action<bool, FileTransfer> cb = null)
+            string description = null, Action<bool, IFileTransfer> cb = null)
         {
             AssertValid();
             return siFileTransfer.InitiateFileTransfer(to, path, description, cb);
@@ -1267,7 +1267,7 @@ namespace Sharp.Xmpp.Client
         /// <exception cref="ObjectDisposedException">The XmppClient object has been
         /// disposed.</exception>
         public string InitiateFileTransfer(Jid to, Stream stream, string name, long size,
-            string description = null, Action<bool, FileTransfer> cb = null)
+            string description = null, Action<bool, IFileTransfer> cb = null)
         {
             AssertValid();
             return siFileTransfer.InitiateFileTransfer(to, stream, name, size, description, cb);
@@ -1286,7 +1286,7 @@ namespace Sharp.Xmpp.Client
         /// the XMPP server.</exception>
         /// <exception cref="ObjectDisposedException">The XmppClient object has been
         /// disposed.</exception>
-        public void CancelFileTransfer(FileTransfer transfer)
+        public void CancelFileTransfer(IFileTransfer transfer)
         {
             AssertValid();
             transfer.ThrowIfNull("transfer");

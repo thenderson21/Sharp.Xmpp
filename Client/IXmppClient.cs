@@ -85,7 +85,7 @@ namespace Sharp.Xmpp.Client
         /// <summary>
         /// Contains settings for configuring file-transfer options.
         /// </summary>
-        FileTransferSettings FileTransferSettings { get; }
+        IFileTransferSettings FileTransferSettings { get; }
 
         /// <summary>
         /// The underlying XmppIm instance.
@@ -644,7 +644,7 @@ namespace Sharp.Xmpp.Client
         /// <exception cref="ObjectDisposedException">The XmppClient object has been
         /// disposed.</exception>
         string InitiateFileTransfer(Jid to, string path,
-            string description = null, Action<bool, FileTransfer> cb = null);
+            string description = null, Action<bool, IFileTransfer> cb = null);
 
         /// <summary>
         /// Offers the XMPP user with the specified JID the file with the specified
@@ -680,7 +680,7 @@ namespace Sharp.Xmpp.Client
         /// <exception cref="ObjectDisposedException">The XmppClient object has been
         /// disposed.</exception>
         string InitiateFileTransfer(Jid to, Stream stream, string name, long size,
-            string description = null, Action<bool, FileTransfer> cb = null);
+            string description = null, Action<bool, IFileTransfer> cb = null);
 
         /// <summary>
         /// Cancels the specified file-transfer.
@@ -695,7 +695,7 @@ namespace Sharp.Xmpp.Client
         /// the XMPP server.</exception>
         /// <exception cref="ObjectDisposedException">The XmppClient object has been
         /// disposed.</exception>
-        void CancelFileTransfer(FileTransfer transfer);
+        void CancelFileTransfer(IFileTransfer transfer);
 
         /// <summary>
         /// Cancels the specified file-transfer.
