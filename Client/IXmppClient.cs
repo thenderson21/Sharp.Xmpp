@@ -90,7 +90,7 @@ namespace Sharp.Xmpp.Client
         /// <summary>
         /// The underlying XmppIm instance.
         /// </summary>
-        XmppIm Im { get; }
+        IXmppIm Im { get; }
 
         /// <summary>
         /// A callback method to invoke when a request for a subscription is received

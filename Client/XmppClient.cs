@@ -336,7 +336,7 @@ namespace Sharp.Xmpp.Client
         /// <summary>
         /// The underlying XmppIm instance.
         /// </summary>
-        public XmppIm Im
+        public IXmppIm Im
         {
             get
             {
