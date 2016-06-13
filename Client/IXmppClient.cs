@@ -376,7 +376,7 @@ namespace Sharp.Xmpp.Client
         /// <exception cref="XmppException">The server returned invalid data or another
         /// unspecified XMPP error occurred.</exception>
         /// <include file='Examples.xml' path='S22/Xmpp/Client/XmppClient[@name="GetRoster"]/*'/>
-        Roster GetRoster();
+        IRoster GetRoster();
 
         /// <summary>
         /// Adds the contact with the specified JID to the user's roster.
@@ -438,7 +438,7 @@ namespace Sharp.Xmpp.Client
         /// error condition.</exception>
         /// <exception cref="XmppException">The server returned invalid data or another
         /// unspecified XMPP error occurred.</exception>
-        void RemoveContact(RosterItem item);
+        void RemoveContact(IRosterItem item);
 
 #if WINDOWSPLATFORM
         /// <summary>

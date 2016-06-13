@@ -16,7 +16,7 @@ namespace Sharp.Xmpp.Im
     /// Implements the basic instant messaging (IM) and presence functionality.
     /// </summary>
     /// <remarks>For implementation details, refer to RFC 3921.</remarks>
-    public class XmppIm : IDisposable, IXmppIm
+    public class XmppIm : IXmppIm
     {
         /// <summary>
         /// Provides access to the core facilities of XMPP.
@@ -346,7 +346,7 @@ namespace Sharp.Xmpp.Im
         /// <exception cref="XmppException">An XMPP error occurred while negotiating the
         /// XML stream with the server, or resource binding failed, or the initialization
         /// of an XMPP extension failed.</exception>
-        public Roster Connect(string resource = null)
+        public IRoster Connect(string resource = null)
         {
             if (disposed)
                 throw new ObjectDisposedException(GetType().FullName);
@@ -365,13 +365,13 @@ namespace Sharp.Xmpp.Im
             try
             {
                 core.Connect(resource);
-                // If no username has been providd, don't establish a session.
+                // If no username has been provided, don't establish a session.
                 if (Username == null)
                     return null;
                 // Establish a session (Refer to RFC 3921, Section 3. Session Establishment).
                 EstablishSession();
                 // Retrieve user's roster as recommended (Refer to RFC 3921, Section 7.3).
-                Roster roster = GetRoster();
+                IRoster roster = this.GetRoster();
                 // Send initial presence.
                 SendPresence(new Presence());
                 return roster;
@@ -410,7 +410,7 @@ namespace Sharp.Xmpp.Im
             // Establish a session (Refer to RFC 3921, Section 3. Session Establishment).
             EstablishSession();
             // Retrieve user's roster as recommended (Refer to RFC 3921, Section 7.3).
-            Roster roster = GetRoster();
+            IRoster roster = this.GetRoster();
             // Send initial presence.
             SendPresence(new Presence());
         }
@@ -752,7 +752,7 @@ namespace Sharp.Xmpp.Im
         /// error condition.</exception>
         /// <exception cref="XmppException">The server returned invalid data or another
         /// unspecified XMPP error occurred.</exception>
-        public Roster GetRoster()
+        public IRoster GetRoster()
         {
             AssertValid();
             Iq iq = IqRequest(IqType.Get, null, Jid,
@@ -784,7 +784,7 @@ namespace Sharp.Xmpp.Im
         /// error condition.</exception>
         /// <exception cref="XmppException">The server returned invalid data or another
         /// unspecified XMPP error occurred.</exception>
-        public void AddToRoster(RosterItem item)
+        public void AddToRoster(IRosterItem item)
         {
             AssertValid();
             item.ThrowIfNull("item");
@@ -845,7 +845,7 @@ namespace Sharp.Xmpp.Im
         /// error condition.</exception>
         /// <exception cref="XmppException">The server returned invalid data or another
         /// unspecified XMPP error occurred.</exception>
-        public void RemoveFromRoster(RosterItem item)
+        public void RemoveFromRoster(IRosterItem item)
         {
             AssertValid();
             item.ThrowIfNull("item");
@@ -1829,7 +1829,7 @@ namespace Sharp.Xmpp.Im
                     if (states.ContainsKey(s))
                         state = states[s];
                     string ask = item.GetAttribute("ask");
-                    RosterItem ri = new RosterItem(jid, name, state, ask == "subscribe", groups);
+                    IRosterItem ri = new RosterItem(jid, name, state, ask == "subscribe", groups);
                     RosterUpdated.Raise(this, new RosterUpdatedEventArgs(ri, s == "remove"));
                 }
                 // Acknowledge IQ request.

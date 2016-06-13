@@ -6,7 +6,7 @@ using Sharp.Xmpp.Extensions;
 
 namespace Sharp.Xmpp.Im
 {
-    public interface IXmppIm
+    public interface IXmppIm : IDisposable
     {
         /// <summary>
         /// Determines whether the instance has been authenticated.
@@ -153,7 +153,7 @@ namespace Sharp.Xmpp.Im
         /// error condition.</exception>
         /// <exception cref="XmppException">The server returned invalid data or another
         /// unspecified XMPP error occurred.</exception>
-        void AddToRoster(RosterItem item);
+        void AddToRoster(IRosterItem item);
 
         /// <summary>
         /// Approves a subscription request received from the contact with
@@ -218,12 +218,7 @@ namespace Sharp.Xmpp.Im
         /// <exception cref="XmppException">An XMPP error occurred while negotiating the
         /// XML stream with the server, or resource binding failed, or the initialization
         /// of an XMPP extension failed.</exception>
-        Roster Connect(string resource = null);
-
-        /// <summary>
-        /// Releases all resources used by the current instance of the XmppIm class.
-        /// </summary>
-        void Dispose();
+        IRoster Connect(string resource = null);
 
         /// <summary>
         /// Creates or updates the privacy list with the name of the specified list
@@ -349,7 +344,7 @@ namespace Sharp.Xmpp.Im
         /// error condition.</exception>
         /// <exception cref="XmppException">The server returned invalid data or another
         /// unspecified XMPP error occurred.</exception>
-        Roster GetRoster();
+        IRoster GetRoster();
 
         /// <summary>
         /// Refuses a subscription request received from the contact with
@@ -383,7 +378,7 @@ namespace Sharp.Xmpp.Im
         /// error condition.</exception>
         /// <exception cref="XmppException">The server returned invalid data or another
         /// unspecified XMPP error occurred.</exception>
-        void RemoveFromRoster(RosterItem item);
+        void RemoveFromRoster(IRosterItem item);
 
         /// <summary>
         /// Removes the item with the specified JID from the user's roster.
