@@ -1,5 +1,8 @@
 ﻿namespace Sharp.Xmpp.Extensions
 {
+    /// <summary>
+    /// Represents an on-going file-transfer operation.
+    /// </summary>
     public interface IFileTransfer
     {
         /// <summary>

@@ -6,6 +6,9 @@ using System.Xml;
 
 namespace Sharp.Xmpp.Im
 {
+    /// <summary>
+    /// Represents an on-going file-transfer operation.
+    /// </summary>
     public interface IMessage
     {
         /// <summary>
