@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Sharp.Xmpp.Extensions
 {
@@ -36,6 +37,15 @@ namespace Sharp.Xmpp.Extensions
         }
 
         /// <summary>
+        /// List of features of the XMPP entity.
+        /// </summary>
+        public IEnumerable<Feature> Features
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the Identity class.
         /// </summary>
         /// <param name="category">The category to which the XMPP entity belongs.</param>
@@ -49,6 +59,27 @@ namespace Sharp.Xmpp.Extensions
             type.ThrowIfNull("type");
             Category = category;
             Type = type;
+            Name = name;
+            Features = new List<Feature>();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the Identity class.
+        /// </summary>
+        /// <param name="category">The category to which the XMPP entity belongs.</param>
+        /// <param name="type">The type of the XMPP entity.</param>
+        /// /// <param name="name">The name of the XMPP entity.</param>
+        /// <param name="features">The features of the XMPP entity.</param>
+        /// <exception cref="ArgumentNullException">The category parameter or the
+        /// type parameter is null.</exception>
+        public Identity(string category, string type, IEnumerable<Feature> features, string name = null)
+        {
+            category.ThrowIfNull("category");
+            type.ThrowIfNull("type");
+            features.ThrowIfNull("features");
+            Category = category;
+            Type = type;
+            Features = features;
             Name = name;
         }
     }

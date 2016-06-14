@@ -10,7 +10,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
     /// <summary>
     /// Represents an instance of a conference room as defined in XEP-0045.
     /// </summary>
-    public class Room
+    public class Room : IRoom
     {
         // Disco Info Result
         private string name;
@@ -32,6 +32,31 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         private Uri logUrl;
         private int maxHistoryFetch;
         private int pubSubNode;
+
+        /// <summary>
+        /// Empty constructor
+        /// </summary>
+        /// <param name="name">Room Name</param>
+        public Room(string name)
+        {
+            this.name = name;
+            this.visibility = RoomVisibility.Public;
+            this.persistence = RoomPersistence.Temporary;
+            this.protection = RoomProtection.Unsecured;
+            this.privacy = RoomPrivacy.Open;
+            this.moderation = RoomModeration.Unmoderated;
+            this.anonymity = RoomAnonymity.NonAnonymous;
+        }
+
+        /// <summary>
+        /// Internal constructor used for room info
+        /// </summary>
+        /// <param name="name">Room Name</param>
+        /// <param name="features">Room Features</param>
+        internal Room(string name, IEnumerable<Feature> features) : this(name)
+        {
+            this.IntialiseRoomSettings(features);
+        }
 
         /// <summary>
         /// The name of the room.
@@ -130,10 +155,55 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         }
 
         /// <summary>
+        /// Initialises the room settings using the provided features.
         /// </summary>
+        /// <param name="features">Room features</param>
+        private void IntialiseRoomSettings(IEnumerable<Feature> features)
         {
-        }
-        }
+            foreach (Feature f in features)
+            {
+                switch (f.Var)
+                {
+                    case "muc_unsecured":
+                        protection = RoomProtection.Unsecured;
+                        break;
+                    case "muc_passwordprotected":
+                        protection = RoomProtection.PasswordProtected;
+                        break;
+                    case "muc_public":
+                        visibility = RoomVisibility.Public;
+                        break;
+                    case "muc_hidden":
+                        visibility = RoomVisibility.Hidden;
+                        break;
+                    case "muc_temporary":
+                        persistence = RoomPersistence.Temporary;
+                        break;
+                    case "muc_persistent":
+                        persistence = RoomPersistence.Persistent;
+                        break;
+                    case "muc_open":
+                        privacy = RoomPrivacy.Open;
+                        break;
+                    case "muc_membersonly":
+                        privacy = RoomPrivacy.MembersOnly;
+                        break;
+                    case "muc_unmoderated":
+                        moderation = RoomModeration.Unmoderated;
+                        break;
+                    case "muc_moderated":
+                        moderation = RoomModeration.Moderated;
+                        break;
+                    case "muc_nonanonymous":
+                        anonymity = RoomAnonymity.NonAnonymous;
+                        break;
+                    case "muc_semianonymous":
+                        anonymity = RoomAnonymity.SemiAnonymous;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 }

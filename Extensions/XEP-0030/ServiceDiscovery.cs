@@ -296,10 +296,33 @@ namespace Sharp.Xmpp.Extensions
                     name = e.GetAttribute("name");
                 if (String.IsNullOrEmpty(cat) || String.IsNullOrEmpty(type))
                     continue;
-                idents.Add(new Identity(cat, type,
+
+                var features = this.GetIdentityFeatures(e);
+                
+                idents.Add(new Identity(cat, type, features,
                     String.IsNullOrEmpty(name) ? null : name));
             }
+
             return idents;
+        }
+
+        /// <summary>
+        /// Parses the Identity element and returns a list of the identity's features.
+        /// </summary>
+        /// <param name="e">identity element</param>
+        /// <returns>list of features in the identity</returns>
+        private IEnumerable<Feature> GetIdentityFeatures(XmlElement e)
+        {
+            List<Feature> features = new List<Feature>();
+            foreach (XmlElement f in e.GetElementsByTagName("feature"))
+            {
+                string var = f.GetAttribute("var");
+                if (String.IsNullOrEmpty(var))
+                    continue;
+                features.Add(new Feature(var));
+            }
+
+            return features;
         }
 
         /// <summary>

@@ -94,7 +94,9 @@
     <Compile Include="Extensions\XEP-0004\Dataforms\TextMultiField.cs" />
     <Compile Include="Extensions\XEP-0004\Dataforms\XmlCollection.cs" />
     <Compile Include="Extensions\XEP-0020\FeatureNegotiation.cs" />
+    <Compile Include="Extensions\XEP-0030\Feature.cs" />
     <Compile Include="Extensions\XEP-0030\Item.cs" />
+    <Compile Include="Extensions\XEP-0045\IRoom.cs" />
     <Compile Include="Extensions\XEP-0045\MultiUserChat.cs" />
     <Compile Include="Extensions\XEP-0045\Room.cs" />
     <Compile Include="Extensions\XEP-0045\RoomAnonymity.cs" />
