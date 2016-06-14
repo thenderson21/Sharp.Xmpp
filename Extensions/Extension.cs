@@ -152,6 +152,12 @@
         /// An extension for receiving messages directed to the bare Jid
         /// on multiple resources that have opted-in
         /// </summary>
-        MessageCarbons
+        MessageCarbons,
+
+        /// <summary>
+        /// An extension for communicating with multiple users in the same chat instance
+        /// (many-to-many chat)
+        /// </summary>
+        MultiUserChat
     }
 }
