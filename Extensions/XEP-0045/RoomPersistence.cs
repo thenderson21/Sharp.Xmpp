@@ -6,6 +6,11 @@
     public enum RoomPersistence
     {
         /// <summary>
+        /// Not specified by the server.
+        /// </summary>
+        Undefined,
+
+        /// <summary>
         /// A room that is destroyed if the last occupant exits.
         /// </summary>
         Temporary,

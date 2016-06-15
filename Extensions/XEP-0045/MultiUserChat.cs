@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Sharp.Xmpp.Core;
 using Sharp.Xmpp.Im;
 
@@ -10,11 +11,8 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
 {
     internal class MultiUserChat : XmppExtension, IInputFilter<Im.Message>
     {
-        private ServiceDiscovery sd;
-
-        public MultiUserChat(XmppIm im, ServiceDiscovery sd) : base(im)
+        public MultiUserChat(XmppIm im) : base(im)
         {
-            this.sd = sd;
         }
 
         /// <summary>
@@ -27,8 +25,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
             get
             {
                 return new string[] {
-                    "http://jabber.org/protocol/disco#rooms",
-                    "http://jabber.org/protocol/muc"
+                    "http://jabber.org/protocol/disco#rooms"
                 };
             }
         }
@@ -58,21 +55,23 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <summary>
         /// Returns a list of active public chat room messages.
         /// </summary>
-        public IEnumerable<Jid> DiscoverRooms(Jid chatService)
+        /// <param name="chatService">JID of the chat service (depends on server)</param>
+        /// <returns>List of Room JIDs</returns>
+        public IEnumerable<RoomInfoBasic> DiscoverRooms(Jid chatService)
         {
-            return sd.GetItems(chatService)
-                .Select(x => x.Jid)
-                .ToList();
+            chatService.ThrowIfNull("chatService");
+            return QueryRooms(chatService);
         }
 
         /// <summary>
         /// Returns a list of active public chat room messages.
         /// </summary>
-        public Room GetRoomInfo(Jid chatRoom)
+        /// <param name="chatRoom">Existing room info</param>
+        /// <returns>Information about room</returns>
+        public RoomInfoExtended GetRoomInfo(RoomInfoBasic chatRoom)
         {
-            return sd.GetIdentities(chatRoom)
-                .Select(x => new Room(x.Name, x.Features))
-                .FirstOrDefault();
+            chatRoom.ThrowIfNull("chatRoom");
+            return QueryRoom(chatRoom);
         }
 
         /// <summary>
@@ -264,6 +263,144 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         public void DestroyRoom()
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Queries the XMPP entity with the specified JID for item information.
+        /// </summary>
+        /// <param name="jid">The JID of the XMPP entity to query.</param>
+        /// <returns>An enumerable collection of items of the XMPP entity
+        /// with the specified JID.</returns>
+        /// <exception cref="ArgumentNullException">The jid parameter
+        /// is null.</exception>
+        /// <exception cref="NotSupportedException">The query could not be
+        /// performed or the response was invalid.</exception>
+        private IEnumerable<RoomInfoBasic> QueryRooms(Jid jid)
+        {
+            jid.ThrowIfNull("jid");
+            Iq iq = im.IqRequest(IqType.Get, jid, im.Jid,
+                Xml.Element("query", "http://jabber.org/protocol/disco#items"));
+            if (iq.Type != IqType.Result)
+                throw new NotSupportedException("Could not query items: " + iq);
+            // Parse the result.
+            var query = iq.Data["query"];
+            if (query == null || query.NamespaceURI != "http://jabber.org/protocol/disco#items")
+                throw new NotSupportedException("Erroneous response: " + iq);
+            ISet<RoomInfoBasic> items = new HashSet<RoomInfoBasic>();
+            foreach (XmlElement e in query.GetElementsByTagName("item"))
+            {
+                string _jid = e.GetAttribute("jid"), node = e.GetAttribute("node"),
+                    name = e.GetAttribute("name");
+                if (String.IsNullOrEmpty(_jid))
+                    continue;
+                try
+                {
+                    Jid itemJid = new Jid(_jid);
+                    items.Add(new RoomInfoBasic(itemJid, name));
+                }
+                catch (ArgumentException)
+                {
+                    // The JID is malformed, ignore the item.
+                }
+            }
+            return items;
+        }
+
+        /// <summary>
+        /// Queries the XMPP entity with the JID in the specified RoomInfo for item information.
+        /// </summary>
+        /// <param name="roomInfo">Holds the JID of the XMPP entity to query.</param>
+        /// <returns>A more detailed description of the specified room.</returns>
+        private RoomInfoExtended QueryRoom(RoomInfoBasic roomInfo)
+        {
+            roomInfo.ThrowIfNull("roomInfo");
+            Iq iq = im.IqRequest(IqType.Get, roomInfo.Jid, im.Jid,
+                Xml.Element("query", "http://jabber.org/protocol/disco#info"));
+            if (iq.Type != IqType.Result)
+                throw new NotSupportedException("Could not query features: " + iq);
+            // Parse the result.
+            var query = iq.Data["query"];
+            if (query == null || query.NamespaceURI != "http://jabber.org/protocol/disco#info")
+                throw new NotSupportedException("Erroneous response: " + iq);
+
+            Identity id = ParseIdentity(query);
+            IEnumerable<Feature> features = ParseFeatures(query);
+            string description = string.Empty;
+            string subject = string.Empty;
+            int occupants = 0;
+            DateTime? creationDate = null;
+
+            foreach (XmlElement e in query.GetElementsByTagName("field"))
+            {
+                switch (e.GetAttribute("var"))
+                {
+                    case "muc#roominfo_description":
+                        description = e.InnerText;
+                        break;
+                    case "muc#roominfo_subject":
+                        subject = e.InnerText;
+                        break;
+                    case "muc#roominfo_occupants":
+                        int.TryParse(e.InnerText, out occupants);
+                        break;
+                    case "x-muc#roominfo_creationdate":
+                        {
+                            DateTime tmp;
+                            if (DateTime.TryParse(e.InnerText, out tmp))
+                                creationDate = tmp;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            return new RoomInfoExtended(roomInfo, id.Name,
+                features, description, subject, occupants, creationDate);
+        }
+
+        /// <summary>
+        /// Queries the XMPP entity with the specified JID for identity information.
+        /// </summary>
+        /// <param name="query">The query result</param>
+        /// <returns>The first Identity returned.</returns>
+        private Identity ParseIdentity(XmlElement query)
+        {
+            Identity result = null;
+
+            foreach (XmlElement e in query.GetElementsByTagName("identity"))
+            {
+                string cat = e.GetAttribute("category"), type = e.GetAttribute("type"),
+                    name = e.GetAttribute("name");
+
+                if (!String.IsNullOrEmpty(cat) && !String.IsNullOrEmpty(type))
+                {
+                    result = new Identity(cat, type,
+                        String.IsNullOrEmpty(name) ? null : name);
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Parses the Identity element and returns a list of the identity's features.
+        /// </summary>
+        /// <param name="query">The query result</param>
+        /// <returns>An enumerable collection of features</returns>
+        private IEnumerable<Feature> ParseFeatures(XmlElement query)
+        {
+            List<Feature> features = new List<Feature>();
+            foreach (XmlElement f in query.GetElementsByTagName("feature"))
+            {
+                string var = f.GetAttribute("var");
+                if (String.IsNullOrEmpty(var))
+                    continue;
+                features.Add(new Feature(var));
+            }
+
+            return features;
         }
     }
 }

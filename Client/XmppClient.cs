@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net.Security;
+using Sharp.Xmpp.Extensions.XEP_0045;
 
 namespace Sharp.Xmpp.Client
 {
@@ -79,6 +80,11 @@ namespace Sharp.Xmpp.Client
         /// Provides access to the 'User Tune' XMPP extension functionality.
         /// </summary>
         private UserTune userTune;
+
+        /// <summary>
+        /// Provides access to the "Multi-User Chat" XMPP extension functionality.
+        /// </summary>
+        private MultiUserChat groupChat;
 
 #if WINDOWSPLATFORM
 		/// <summary>
@@ -1660,6 +1666,29 @@ namespace Sharp.Xmpp.Client
         }
 
         /// <summary>
+        /// Returns a list of active public chat room messages.
+        /// </summary>
+        /// <param name="chatService">JID of the chat service (depends on server)</param>
+        /// <returns>List of Room JIDs</returns>
+        public IEnumerable<RoomInfoBasic> DiscoverRooms(Jid chatService)
+        {
+            AssertValid();
+            return groupChat.DiscoverRooms(chatService);
+        }
+
+
+        /// <summary>
+        /// Returns a list of active public chat room messages.
+        /// </summary>
+        /// <param name="chatRoom">JID of the chat room</param>
+        /// <returns>Information about room</returns>
+        public RoomInfoExtended GetRoomInfo(RoomInfoBasic chatRoom)
+        {
+            AssertValid();
+            return groupChat.GetRoomInfo(chatRoom);
+        }
+
+        /// <summary>
         /// Closes the connection with the XMPP server. This automatically disposes
         /// of the object.
         /// </summary>
@@ -1756,6 +1785,7 @@ namespace Sharp.Xmpp.Client
             bitsOfBinary = im.LoadExtension<BitsOfBinary>();
             vcardAvatars = im.LoadExtension<VCardAvatars>();
             cusiqextension = im.LoadExtension<CustomIqExtension>();
+            groupChat = im.LoadExtension<MultiUserChat>();
         }
     }
 }

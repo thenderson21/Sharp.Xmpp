@@ -7,6 +7,11 @@
     public enum RoomAnonymity
     {
         /// <summary>
+        /// Not specified by the server.
+        /// </summary>
+        Undefined,
+
+        /// <summary>
         /// A room in which an occupant's full JID is exposed to all other occupants,
         /// although the occupant can request any desired room nickname.
         /// </summary>

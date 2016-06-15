@@ -6,6 +6,11 @@
     public enum RoomPrivacy
     {
         /// <summary>
+        /// Not specified by the server.
+        /// </summary>
+        Undefined,
+
+        /// <summary>
         /// A room that non-banned entities are allowed to enter
         /// without being on the member list.
         /// </summary>

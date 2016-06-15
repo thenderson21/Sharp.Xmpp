@@ -6,6 +6,11 @@
     public enum RoomVisibility
     {
         /// <summary>
+        /// Not specified by the server.
+        /// </summary>
+        Undefined,
+
+        /// <summary>
         /// A room that can be found by any user through normal means
         /// such as searching and service discovery.
         /// </summary>
