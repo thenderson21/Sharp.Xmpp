@@ -1688,6 +1688,12 @@ namespace Sharp.Xmpp.Client
             return groupChat.GetRoomInfo(chatRoom);
         }
 
+        public void JoinRoom(RoomInfoBasic chatRoom, string nickname)
+        {
+            AssertValid();
+            groupChat.JoinRoom(chatRoom, nickname);
+        }
+
         /// <summary>
         /// Closes the connection with the XMPP server. This automatically disposes
         /// of the object.

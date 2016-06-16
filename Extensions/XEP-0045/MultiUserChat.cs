@@ -75,6 +75,26 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         }
 
         /// <summary>
+        /// Joins or creates new room using the specified room
+        /// </summary>
+        public void JoinRoom(RoomInfoBasic room, string nickname)
+        {
+            JoinRoom(room.Jid, nickname);
+        }
+
+        /// <summary>
+        /// Joins or creates new room using the specified room
+        /// </summary>
+        public void JoinRoom(Jid jid, string nickname)
+        {
+            XmlElement elem = Xml.Element("x", "http://jabber.org/protocol/muc");
+            Jid joinRequest = new Jid(jid.Domain, jid.Node, nickname);
+            var msg = new Core.Presence(joinRequest, im.Jid, null, null, elem);
+
+            im.SendPresence(new Im.Presence(msg));
+        }
+
+        /// <summary>
         /// Returns previous chat room messages.
         /// </summary>
         public void GetMessageLog()
