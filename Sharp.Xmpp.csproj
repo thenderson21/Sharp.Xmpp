@@ -99,6 +99,7 @@
     <Compile Include="Extensions\XEP-0045\Field.cs" />
     <Compile Include="Extensions\XEP-0045\IRoom.cs" />
     <Compile Include="Extensions\XEP-0045\MultiUserChat.cs" />
+    <Compile Include="Extensions\XEP-0045\MucNs.cs" />
     <Compile Include="Extensions\XEP-0045\Room.cs" />
     <Compile Include="Extensions\XEP-0045\RoomAnonymity.cs" />
     <Compile Include="Extensions\XEP-0045\RoomInfoBasic.cs" />
