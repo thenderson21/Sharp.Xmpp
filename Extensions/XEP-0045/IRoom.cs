@@ -27,47 +27,47 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <summary>
         /// The anonymity level of the room.
         /// </summary>
-        RoomAnonymity RoomAnonymity { get; }
+        RoomAnonymity Anonymity { get; }
 
         /// <summary>
         /// The description of the room.
         /// </summary>
-        string RoomDescription { get; }
+        string Description { get; }
 
         /// <summary>
         /// The moderation level of the room.
         /// </summary>
-        RoomModeration RoomModeration { get; }
+        RoomModeration Moderation { get; }
 
 
         /// <summary>
         /// The name of the room.
         /// </summary>
-        string RoomName { get; }
+        string Name { get; }
 
         /// <summary>
         /// The persistence level of the room.
         /// </summary>
-        RoomPersistence RoomPersistence { get; }
+        RoomPersistence Persistence { get; }
 
         /// <summary>
         /// The privacy level of the room.
         /// </summary>
-        RoomPrivacy RoomPrivacy { get; }
+        RoomPrivacy Privacy { get; }
 
         /// <summary>
         /// The protection level of the room.
         /// </summary>
-        RoomProtection RoomProtection { get; }
+        RoomProtection Protection { get; }
 
         /// <summary>
         /// The subject of the room.
         /// </summary>
-        string RoomSubject { get; }
+        string Subject { get; }
 
         /// <summary>
         /// The visibility of the room.
         /// </summary>
-        RoomVisibility RoomVisibility { get; }
+        RoomVisibility Visibility { get; }
     }
 }

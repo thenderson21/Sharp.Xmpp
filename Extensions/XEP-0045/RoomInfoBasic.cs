@@ -25,9 +25,9 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
             Jid = jid;
 
             if (string.IsNullOrWhiteSpace(name))
-                RoomName = jid.Node;
+                Name = jid.Node;
             else
-                RoomName = name;
+                Name = name;
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         public RoomInfoBasic(RoomInfoBasic room)
         {
             Jid = room.Jid;
-            RoomName = room.RoomName;
+            Name = room.Name;
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <summary>
         /// The name of the room.
         /// </summary>
-        public string RoomName
+        public string Name
         {
             get { return name; }
             protected set { name = value; }

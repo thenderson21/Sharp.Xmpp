@@ -26,14 +26,14 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         internal RoomInfoExtended(Jid jid, string name, string description, string subject) 
             : base(jid, name)
         {
-            RoomVisibility = RoomVisibility.Public;
-            RoomPersistence = RoomPersistence.Temporary;
-            RoomProtection = RoomProtection.Unsecured;
-            RoomPrivacy = RoomPrivacy.Open;
-            RoomModeration = RoomModeration.Unmoderated;
-            RoomAnonymity = RoomAnonymity.NonAnonymous;
-            RoomDescription = description;
-            RoomSubject = subject;
+            Visibility = RoomVisibility.Public;
+            Persistence = RoomPersistence.Temporary;
+            Protection = RoomProtection.Unsecured;
+            Privacy = RoomPrivacy.Open;
+            Moderation = RoomModeration.Unmoderated;
+            Anonymity = RoomAnonymity.NonAnonymous;
+            Description = description;
+            Subject = subject;
             NumberOfOccupants = 0;
             CreationDate = DateTime.UtcNow;
         }
@@ -42,14 +42,14 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
             string description, string subject, int occupants, DateTime? creation)
              : base(jid, name)
         {
-            RoomVisibility = RoomVisibility.Undefined;
-            RoomPersistence = RoomPersistence.Undefined;
-            RoomProtection = RoomProtection.Undefined;
-            RoomPrivacy = RoomPrivacy.Undefined;
-            RoomModeration = RoomModeration.Undefined;
-            RoomAnonymity = RoomAnonymity.Undefined;
-            RoomDescription = string.IsNullOrEmpty(description) ? string.Empty : description;
-            RoomSubject = string.IsNullOrEmpty(subject) ? string.Empty : subject;
+            Visibility = RoomVisibility.Undefined;
+            Persistence = RoomPersistence.Undefined;
+            Protection = RoomProtection.Undefined;
+            Privacy = RoomPrivacy.Undefined;
+            Moderation = RoomModeration.Undefined;
+            Anonymity = RoomAnonymity.Undefined;
+            Description = string.IsNullOrEmpty(description) ? string.Empty : description;
+            Subject = string.IsNullOrEmpty(subject) ? string.Empty : subject;
             NumberOfOccupants = occupants;
             creationDate = creation;
 
@@ -58,16 +58,16 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
 
         internal RoomInfoExtended(RoomInfoBasic room, string name, IEnumerable<Feature> features,
             string description, string subject, int occupants, DateTime? creation)
-             : this(room.Jid, room.RoomName, features, description, subject,  occupants,  creation)
+             : this(room.Jid, room.Name, features, description, subject,  occupants,  creation)
         {
-            if (RoomName != name)
-                RoomName = name;
+            if (Name != name)
+                Name = name;
         }
 
         /// <summary>
         /// The visibility of the room.
         /// </summary>
-        public RoomVisibility RoomVisibility
+        public RoomVisibility Visibility
         {
             get { return visibility; }
             protected set { visibility = value; }
@@ -76,7 +76,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <summary>
         /// The persistence level of the room.
         /// </summary>
-        public RoomPersistence RoomPersistence
+        public RoomPersistence Persistence
         {
             get { return persistence; }
             protected set { persistence = value; }
@@ -85,7 +85,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <summary>
         /// The protection level of the room.
         /// </summary>
-        public RoomProtection RoomProtection
+        public RoomProtection Protection
         {
             get { return protection; }
             protected set { protection = value; }
@@ -94,7 +94,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <summary>
         /// The privacy level of the room.
         /// </summary>
-        public RoomPrivacy RoomPrivacy
+        public RoomPrivacy Privacy
         {
             get { return privacy; }
             protected set { privacy = value; }
@@ -103,7 +103,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <summary>
         /// The moderation level of the room.
         /// </summary>
-        public RoomModeration RoomModeration
+        public RoomModeration Moderation
         {
             get { return moderation; }
             protected set { moderation = value; }
@@ -112,7 +112,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <summary>
         /// The anonymity level of the room.
         /// </summary>
-        public RoomAnonymity RoomAnonymity
+        public RoomAnonymity Anonymity
         {
             get { return anonymity; }
             protected set { anonymity = value; }
@@ -121,7 +121,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <summary>
         /// The description of the room.
         /// </summary>
-        public string RoomDescription
+        public string Description
         {
             get { return description; }
             protected set { description = value; }
@@ -130,7 +130,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <summary>
         /// The subject of the room.
         /// </summary>
-        public string RoomSubject
+        public string Subject
         {
             get { return subject; }
             protected set { subject = value; }
@@ -165,40 +165,40 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
                 switch (f.Var)
                 {
                     case "muc_unsecured":
-                        RoomProtection = RoomProtection.Unsecured;
+                        Protection = RoomProtection.Unsecured;
                         break;
                     case "muc_passwordprotected":
-                        RoomProtection = RoomProtection.PasswordProtected;
+                        Protection = RoomProtection.PasswordProtected;
                         break;
                     case "muc_public":
-                        RoomVisibility = RoomVisibility.Public;
+                        Visibility = RoomVisibility.Public;
                         break;
                     case "muc_hidden":
-                        RoomVisibility = RoomVisibility.Hidden;
+                        Visibility = RoomVisibility.Hidden;
                         break;
                     case "muc_temporary":
-                        RoomPersistence = RoomPersistence.Temporary;
+                        Persistence = RoomPersistence.Temporary;
                         break;
                     case "muc_persistent":
-                        RoomPersistence = RoomPersistence.Persistent;
+                        Persistence = RoomPersistence.Persistent;
                         break;
                     case "muc_open":
-                        RoomPrivacy = RoomPrivacy.Open;
+                        Privacy = RoomPrivacy.Open;
                         break;
                     case "muc_membersonly":
-                        RoomPrivacy = RoomPrivacy.MembersOnly;
+                        Privacy = RoomPrivacy.MembersOnly;
                         break;
                     case "muc_unmoderated":
-                        RoomModeration = RoomModeration.Unmoderated;
+                        Moderation = RoomModeration.Unmoderated;
                         break;
                     case "muc_moderated":
-                        RoomModeration = RoomModeration.Moderated;
+                        Moderation = RoomModeration.Moderated;
                         break;
                     case "muc_nonanonymous":
-                        RoomAnonymity = RoomAnonymity.NonAnonymous;
+                        Anonymity = RoomAnonymity.NonAnonymous;
                         break;
                     case "muc_semianonymous":
-                        RoomAnonymity = RoomAnonymity.SemiAnonymous;
+                        Anonymity = RoomAnonymity.SemiAnonymous;
                         break;
                     default:
                         break;
