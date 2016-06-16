@@ -29,6 +29,92 @@
 
         public const string NsRoomInfo = NsMain + "#roominfo";
 
+        // Room Features
+
+        /// <summary>
+        /// Unsecured Room
+        /// A room that anyone is allowed to enter without first providing the correct password; 
+        /// antonym: Password-Protected Room.
+        /// </summary>
+        public const string FeatureProtectionUnsecured = "muc_unsecured";
+
+        /// <summary>
+        /// Password-Protected Room
+        /// A room that a user cannot enter without first providing the correct password; 
+        /// antonym: Unsecured Room.
+        /// </summary>
+        public const string FeatureProtectionPassword = "muc_passwordprotected";
+
+        /// <summary>
+        /// Public Room
+        /// A room that can be found by any user through normal means such as searching and service discovery;
+        /// antonym: Hidden Room.
+        /// </summary>
+        public const string FeatureVisiblityPublic = "muc_public";
+
+        /// <summary>
+        /// Hidden Room
+        /// A room that cannot be found by any user through normal means such as searching and service discovery; 
+        /// antonym: Public Room.
+        /// </summary>
+        public const string FeatureVisiblityHidden = "muc_hidden";
+
+        /// <summary>
+        /// Temporary Room
+        /// A room that is destroyed if the last occupant exits; 
+        /// antonym: Persistent Room.
+        /// </summary>
+        public const string FeaturePersistTemporary = "muc_temporary";
+
+        /// <summary>
+        /// Persistent Room
+        /// A room that is not destroyed if the last occupant exits; 
+        /// antonym: Temporary Room.
+        /// </summary>
+        public const string FeaturePersistPersistent = "muc_persistent";
+
+        /// <summary>
+        /// Open Room
+        /// A room that non-banned entities are allowed to enter without being on the member list; 
+        /// antonym: Members-Only Room.
+        /// </summary>
+        public const string FeaturePrivacyOpen = "muc_open";
+
+        /// <summary>
+        /// Members-Only Room
+        /// A room that a user cannot enter without being on the member list; 
+        /// antonym: Open Room.
+        /// </summary>
+        public const string FeaturePrivacyMembersOnly = "muc_membersonly";
+
+        /// <summary>
+        /// Unmoderated Room
+        /// A room in which any occupant is allowed to send messages to all occupants;
+        /// antonym: Moderated Room.
+        /// </summary>
+        public const string FeatureUnmoderated = "muc_unmoderated";
+
+        /// <summary>
+        /// Moderated Room
+        /// A room in which only those with "voice" are allowed to send messages to all occupants; 
+        /// antonym: Unmoderated Room.
+        /// </summary>
+        public const string FeatureModerated = "muc_moderated";
+
+        /// <summary>
+        /// Non-Anonymous Room
+        /// A room in which an occupant's full JID is exposed to all other occupants, although the occupant can request any desired room nickname; 
+        /// contrast with Semi-Anonymous Room.
+        /// </summary>
+        public const string FeatureNonAnonymous = "muc_nonanonymous";
+
+        /// <summary>
+        /// Semi-Anonymous Room
+        /// A room in which an occupant's full JID can be discovered by room admins only; 
+        /// contrast with Non-Anonymous Room.
+        /// </summary>
+        public const string FeatureSemiAnonymous = "muc_semianonymous";
+
         // Room Info
 
         /// <summary>
@@ -84,7 +170,7 @@
         /// <summary>
         /// Date the room was created.
         /// </summary>
-        public const string InfoCreationDate = "muc#roominfo_creationdate";
+        public const string InfoCreationDate = "x-muc#roominfo_creationdate";
 
         /// <summary>
         /// Maximum Number of History Messages Returned by Room.

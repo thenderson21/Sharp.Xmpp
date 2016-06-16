@@ -34,7 +34,7 @@ namespace Sharp.Xmpp.Extensions
         /// <param name="value">Data</param>
         public Field(string var, string label, string value)
         {
-            Var = string.IsNullOrEmpty(var) ? string.Empty : value;
+            Var = string.IsNullOrEmpty(var) ? string.Empty : var;
             Label = string.IsNullOrEmpty(label) ? string.Empty : label;
             Value = string.IsNullOrEmpty(value) ? string.Empty : value;
         }

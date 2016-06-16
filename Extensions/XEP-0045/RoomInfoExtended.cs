@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,12 +10,21 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
     /// <summary>
     /// Room information provided upon inspection.
     /// </summary>
-    public class RoomInfoExtended : RoomInfoBasic
+    public class RoomInfoExtended : RoomInfoBasic, IRoom
     {
         private string description;
         private string subject;
-        private int occupants;
+        private string ldapGroup;
+        private string logUrl;
+        private string pubSubNode;
+        private int occupantsCount;
+        private int maxHistoryFetch;
+        private bool canChangeSubject;
         private DateTime? creationDate;
+        private CultureInfo language;
+
+        private IList<Jid> contactAddresses;
+        private ISet<Jid> occupants;
 
         private RoomVisibility visibility;
         private RoomPersistence persistence;
@@ -23,7 +33,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         private RoomModeration moderation;
         private RoomAnonymity anonymity;
 
-        internal RoomInfoExtended(Jid jid, string name, string description, string subject) 
+        internal RoomInfoExtended(Jid jid, string name, string description, string subject)
             : base(jid, name)
         {
             Visibility = RoomVisibility.Public;
@@ -32,14 +42,20 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
             Privacy = RoomPrivacy.Open;
             Moderation = RoomModeration.Unmoderated;
             Anonymity = RoomAnonymity.NonAnonymous;
-            Description = description;
-            Subject = subject;
+            Description = string.Empty;
+            Subject = string.Empty;
+            LDAPGroup = string.Empty;
+            LogUrl = string.Empty;
+            pubSubNode = string.Empty;
+            canChangeSubject = false;
+            MaxHistoryFetch = 0;
             NumberOfOccupants = 0;
             CreationDate = DateTime.UtcNow;
+            contactAddresses = new List<Jid>();
+            occupants = new HashSet<Jid>();
         }
 
-        internal RoomInfoExtended(Jid jid, string name, IEnumerable<Feature> features,
-            string description, string subject, int occupants, DateTime? creation)
+        internal RoomInfoExtended(Jid jid, string name, IEnumerable<Feature> features, IEnumerable<Field> fields)
              : base(jid, name)
         {
             Visibility = RoomVisibility.Undefined;
@@ -48,17 +64,25 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
             Privacy = RoomPrivacy.Undefined;
             Moderation = RoomModeration.Undefined;
             Anonymity = RoomAnonymity.Undefined;
-            Description = string.IsNullOrEmpty(description) ? string.Empty : description;
-            Subject = string.IsNullOrEmpty(subject) ? string.Empty : subject;
-            NumberOfOccupants = occupants;
-            creationDate = creation;
+            Description = string.Empty;
+            Subject = string.Empty;
+            LDAPGroup = string.Empty;
+            LogUrl = string.Empty;
+            pubSubNode = string.Empty;
+            canChangeSubject = false;
+            MaxHistoryFetch = 0;
+            NumberOfOccupants = 0;
+            CreationDate = null;
+            contactAddresses = new List<Jid>();
+            occupants = new HashSet<Jid>();
 
             IntialiseRoomSettings(features);
+            IntialiseRoomSettings(fields);
         }
 
-        internal RoomInfoExtended(RoomInfoBasic room, string name, IEnumerable<Feature> features,
-            string description, string subject, int occupants, DateTime? creation)
-             : this(room.Jid, room.Name, features, description, subject,  occupants,  creation)
+        internal RoomInfoExtended(IRoomBasic room, string name,
+            IEnumerable<Feature> features, IEnumerable<Field> fields)
+             : this(room.Jid, room.Name, features, fields)
         {
             if (Name != name)
                 Name = name;
@@ -141,8 +165,8 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// </summary>
         public int NumberOfOccupants
         {
-            get { return occupants; }
-            protected set { occupants = value; }
+            get { return occupantsCount; }
+            protected set { occupantsCount = value; }
         }
 
         /// <summary>
@@ -155,6 +179,66 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         }
 
         /// <summary>
+        /// The owner or owners of the room.
+        /// </summary>
+        public IEnumerable<Jid> ContactAddresses
+        {
+            get { return contactAddresses; }
+        }
+
+        /// <summary>
+        /// The participants in the room.
+        /// </summary>
+        public IEnumerable<Jid> Occupants
+        {
+            get { return occupants; }
+        }
+
+        /// <summary>
+        /// An associated LDAP group that defines room membership.
+        /// </summary>
+        public string LDAPGroup
+        {
+            get { return ldapGroup; }
+            protected set { ldapGroup = value; }
+        }
+
+        /// <summary>
+        /// The language of the room.
+        /// </summary>
+        public CultureInfo Language
+        {
+            get { return language; }
+            protected set { language = value; }
+        }
+
+        /// <summary>
+        /// The language of the room.
+        /// </summary>
+        public string LogUrl
+        {
+            get { return logUrl; }
+            protected set { logUrl = value; }
+        }
+
+        /// <summary>
+        /// The maximum number historic of messages a room will display.
+        /// </summary>
+        public int MaxHistoryFetch
+        {
+            get { return maxHistoryFetch; }
+            protected set { maxHistoryFetch = value; }
+        }
+
+        private void InvalidateOccupantsCount(bool shouldInvalidate = true)
+        {
+            if (shouldInvalidate)
+            {
+                NumberOfOccupants = Occupants.Count();
+            }
+        }
+
+        /// <summary>
         /// Initialises the room settings using the provided features.
         /// </summary>
         /// <param name="features">Room features</param>
@@ -164,40 +248,40 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
             {
                 switch (f.Var)
                 {
-                    case "muc_unsecured":
+                    case MucNs.FeatureProtectionUnsecured:
                         Protection = RoomProtection.Unsecured;
                         break;
-                    case "muc_passwordprotected":
+                    case MucNs.FeatureProtectionPassword:
                         Protection = RoomProtection.PasswordProtected;
                         break;
-                    case "muc_public":
+                    case MucNs.FeatureVisiblityPublic:
                         Visibility = RoomVisibility.Public;
                         break;
-                    case "muc_hidden":
+                    case MucNs.FeatureVisiblityHidden:
                         Visibility = RoomVisibility.Hidden;
                         break;
-                    case "muc_temporary":
+                    case MucNs.FeaturePersistTemporary:
                         Persistence = RoomPersistence.Temporary;
                         break;
-                    case "muc_persistent":
+                    case MucNs.FeaturePersistPersistent:
                         Persistence = RoomPersistence.Persistent;
                         break;
-                    case "muc_open":
+                    case MucNs.FeaturePrivacyOpen:
                         Privacy = RoomPrivacy.Open;
                         break;
-                    case "muc_membersonly":
+                    case MucNs.FeaturePrivacyMembersOnly:
                         Privacy = RoomPrivacy.MembersOnly;
                         break;
-                    case "muc_unmoderated":
+                    case MucNs.FeatureUnmoderated:
                         Moderation = RoomModeration.Unmoderated;
                         break;
-                    case "muc_moderated":
+                    case MucNs.FeatureModerated:
                         Moderation = RoomModeration.Moderated;
                         break;
-                    case "muc_nonanonymous":
+                    case MucNs.FeatureNonAnonymous:
                         Anonymity = RoomAnonymity.NonAnonymous;
                         break;
-                    case "muc_semianonymous":
+                    case MucNs.FeatureSemiAnonymous:
                         Anonymity = RoomAnonymity.SemiAnonymous;
                         break;
                     default:
@@ -206,5 +290,108 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
             }
         }
 
+        /// <summary>
+        /// Initialises the room settings using the provided fields.
+        /// </summary>
+        /// <param name="fields">Room fields</param>
+        private void IntialiseRoomSettings(IEnumerable<Field> fields)
+        {
+            foreach (Field f in fields)
+                switch (f.Var)
+                {
+                    case MucNs.InfoDescription:
+                        Description = f.Value;
+                        break;
+                    case MucNs.InfoChangeSubject:
+                        canChangeSubject = ConvertToBoolean(f.Value);
+                        break;
+                    case MucNs.InfoContactJid:
+                        contactAddresses.Add(new Jid(f.Value));
+                        break;
+                    case MucNs.InfoCreationDate:
+                        CreationDate = ConvertToDateTime(f.Value);
+                        break;
+                    case MucNs.InfoSubject:
+                        Subject = f.Value;
+                        break;
+                    case MucNs.InfoSubjectMod:
+                        canChangeSubject = ConvertToBoolean(f.Value);
+                        break;
+                    case MucNs.InfoOccupants:
+                        NumberOfOccupants = ConvertToInteger(f.Value);
+                        break;
+                    case MucNs.InfoLdapGroup:
+                        LDAPGroup = f.Value;
+                        break;
+                    case MucNs.InfoLanguage:
+                        Language = ConvertToCultureInfo(f.Value);
+                        break;
+                    case MucNs.InfoLogs:
+                        LogUrl = f.Value;
+                        break;
+                    case MucNs.InfoPubSub:
+                        pubSubNode = f.Value;
+                        break;
+                    case MucNs.MaxHistoryFetch:
+                        maxHistoryFetch = ConvertToInteger(f.Value);
+                        break;
+                    default:
+                        break;
+                }
+
+            InvalidateOccupantsCount(NumberOfOccupants != Occupants.Count());
+        }
+
+        private bool ConvertToBoolean(string value)
+        {
+            bool tmp;
+
+            if (bool.TryParse(value, out tmp))
+            {
+                return tmp;
+            }
+
+            return false;
+        }
+
+        private CultureInfo ConvertToCultureInfo(string value)
+        {
+            CultureInfo tmp = null;
+
+            try
+            {
+                tmp = CultureInfo.GetCultureInfo(value);
+            }
+            catch (CultureNotFoundException)
+            {
+                // Suppress missing cultures
+            }
+
+            return tmp;
+        }
+
+        private DateTime? ConvertToDateTime(string value)
+        {
+            DateTime tmp;
+
+            if (DateTime.TryParse(value, out tmp))
+            {
+                return tmp;
+            }
+
+            return null;
+        }
+
+        private int ConvertToInteger(string value)
+        {
+            int tmp;
+
+            if (int.TryParse(value, out tmp))
+            {
+                return tmp;
+            }
+
+            return 0;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Sharp.Xmpp.Extensions.XEP_0045
@@ -6,13 +7,27 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
     /// <summary>
     /// Represents an instance of a conference room as defined in XEP-0045.
     /// </summary>
-    public interface IRoom
+    public interface IRoom : IRoomBasic
     {
+        /// <summary>
+        /// The anonymity level of the room.
+        /// </summary>
+        RoomAnonymity Anonymity { get; }
 
         /// <summary>
         /// The owner or owners of the room.
         /// </summary>
         IEnumerable<Jid> ContactAddresses { get; }
+
+        /// <summary>
+        /// Datetime the room was created.
+        /// </summary>
+        DateTime? CreationDate { get; }
+
+        /// <summary>
+        /// The description of the room.
+        /// </summary>
+        string Description { get; }
 
         /// <summary>
         /// The language of the room.
@@ -25,25 +40,29 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         string LDAPGroup { get; }
 
         /// <summary>
-        /// The anonymity level of the room.
+        /// The language of the room.
         /// </summary>
-        RoomAnonymity Anonymity { get; }
+        string LogUrl { get; }
 
         /// <summary>
-        /// The description of the room.
+        /// The maximum number historic of messages a room will display.
         /// </summary>
-        string Description { get; }
+        int MaxHistoryFetch { get; }
 
         /// <summary>
         /// The moderation level of the room.
         /// </summary>
         RoomModeration Moderation { get; }
 
+        /// <summary>
+        /// The number of occupants in the room.
+        /// </summary>
+        int NumberOfOccupants { get; }
 
         /// <summary>
-        /// The name of the room.
+        /// 
         /// </summary>
-        string Name { get; }
+        IEnumerable<Jid> Occupants { get; }
 
         /// <summary>
         /// The persistence level of the room.

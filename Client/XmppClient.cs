@@ -1670,7 +1670,7 @@ namespace Sharp.Xmpp.Client
         /// </summary>
         /// <param name="chatService">JID of the chat service (depends on server)</param>
         /// <returns>List of Room JIDs</returns>
-        public IEnumerable<RoomInfoBasic> DiscoverRooms(Jid chatService)
+        public IEnumerable<IRoomBasic> DiscoverRooms(Jid chatService)
         {
             AssertValid();
             return groupChat.DiscoverRooms(chatService);
@@ -1680,15 +1680,20 @@ namespace Sharp.Xmpp.Client
         /// <summary>
         /// Returns a list of active public chat room messages.
         /// </summary>
-        /// <param name="chatRoom">JID of the chat room</param>
+        /// <param name="chatRoom">Room Identifier</param>
         /// <returns>Information about room</returns>
-        public RoomInfoExtended GetRoomInfo(RoomInfoBasic chatRoom)
+        public IRoom GetRoomInfo(IRoomBasic chatRoom)
         {
             AssertValid();
             return groupChat.GetRoomInfo(chatRoom);
         }
 
-        public void JoinRoom(RoomInfoBasic chatRoom, string nickname)
+        /// <summary>
+        /// Joins or creates new room using the specified room
+        /// </summary>
+        /// <param name="chatRoom">Room Identifier</param>
+        /// <param name="nickname">Desired Nickname</param>
+        public void JoinRoom(IRoomBasic chatRoom, string nickname)
         {
             AssertValid();
             groupChat.JoinRoom(chatRoom, nickname);

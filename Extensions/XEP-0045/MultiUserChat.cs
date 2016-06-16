@@ -57,7 +57,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// </summary>
         /// <param name="chatService">JID of the chat service (depends on server)</param>
         /// <returns>List of Room JIDs</returns>
-        public IEnumerable<RoomInfoBasic> DiscoverRooms(Jid chatService)
+        public IEnumerable<IRoomBasic> DiscoverRooms(Jid chatService)
         {
             chatService.ThrowIfNull("chatService");
             return QueryRooms(chatService);
@@ -68,7 +68,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// </summary>
         /// <param name="chatRoom">Existing room info</param>
         /// <returns>Information about room</returns>
-        public RoomInfoExtended GetRoomInfo(RoomInfoBasic chatRoom)
+        public IRoom GetRoomInfo(IRoomBasic chatRoom)
         {
             chatRoom.ThrowIfNull("chatRoom");
             return QueryRoom(chatRoom);
@@ -77,7 +77,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <summary>
         /// Joins or creates new room using the specified room
         /// </summary>
-        public void JoinRoom(RoomInfoBasic room, string nickname)
+        public void JoinRoom(IRoomBasic room, string nickname)
         {
             JoinRoom(room.Jid, nickname);
         }
@@ -331,7 +331,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// </summary>
         /// <param name="roomInfo">Holds the JID of the XMPP entity to query.</param>
         /// <returns>A more detailed description of the specified room.</returns>
-        private RoomInfoExtended QueryRoom(RoomInfoBasic roomInfo)
+        private RoomInfoExtended QueryRoom(IRoomBasic roomInfo)
         {
             roomInfo.ThrowIfNull("roomInfo");
             Iq iq = im.IqRequest(IqType.Get, roomInfo.Jid, im.Jid,
@@ -345,38 +345,9 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
 
             Identity id = ParseIdentity(query);
             IEnumerable<Feature> features = ParseFeatures(query);
-            string description = string.Empty;
-            string subject = string.Empty;
-            int occupants = 0;
-            DateTime? creationDate = null;
-
-            foreach (Field f in ParseFields(query))
-            {
-                switch (f.Var)
-                {
-                    case "muc#roominfo_description":
-                        description = f.Value;
-                        break;
-                    case "muc#roominfo_subject":
-                        subject = f.Value;
-                        break;
-                    case "muc#roominfo_occupants":
-                        int.TryParse(f.Value, out occupants);
-                        break;
-                    case "x-muc#roominfo_creationdate":
-                        {
-                            DateTime tmp;
-                            if (DateTime.TryParse(f.Value, out tmp))
-                                creationDate = tmp;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            return new RoomInfoExtended(roomInfo, id.Name,
-                features, description, subject, occupants, creationDate);
+            IEnumerable<Field> fields = ParseFields(query);
+            
+            return new RoomInfoExtended(roomInfo, id.Name, features, fields);
         }
 
         /// <summary>
@@ -439,6 +410,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
 
                 fields.Add(new Field(var, label, value));
             }
+
             return fields;
         }
     }

@@ -9,7 +9,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
     /// <summary>
     /// The most basic form of a chat room
     /// </summary>
-    public class RoomInfoBasic
+    public class RoomInfoBasic : IRoomBasic
     {
         private Jid jid;
         private string name;
@@ -48,7 +48,6 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
             get { return jid; }
             protected set { jid = value; }
         }
-
 
         /// <summary>
         /// The name of the room.
