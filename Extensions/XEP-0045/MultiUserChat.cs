@@ -25,7 +25,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
             get
             {
                 return new string[] {
-                    "http://jabber.org/protocol/disco#rooms"
+                    "http://jabber.org/protocol/muc"
                 };
             }
         }
@@ -330,23 +330,23 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
             int occupants = 0;
             DateTime? creationDate = null;
 
-            foreach (XmlElement e in query.GetElementsByTagName("field"))
+            foreach (Field f in ParseFields(query))
             {
-                switch (e.GetAttribute("var"))
+                switch (f.Var)
                 {
                     case "muc#roominfo_description":
-                        description = e.InnerText;
+                        description = f.Value;
                         break;
                     case "muc#roominfo_subject":
-                        subject = e.InnerText;
+                        subject = f.Value;
                         break;
                     case "muc#roominfo_occupants":
-                        int.TryParse(e.InnerText, out occupants);
+                        int.TryParse(f.Value, out occupants);
                         break;
                     case "x-muc#roominfo_creationdate":
                         {
                             DateTime tmp;
-                            if (DateTime.TryParse(e.InnerText, out tmp))
+                            if (DateTime.TryParse(f.Value, out tmp))
                                 creationDate = tmp;
                         }
                         break;
@@ -370,8 +370,9 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
 
             foreach (XmlElement e in query.GetElementsByTagName("identity"))
             {
-                string cat = e.GetAttribute("category"), type = e.GetAttribute("type"),
-                    name = e.GetAttribute("name");
+                string cat = e.GetAttribute("category");
+                string type = e.GetAttribute("type");
+                string name = e.GetAttribute("name");
 
                 if (!String.IsNullOrEmpty(cat) && !String.IsNullOrEmpty(type))
                 {
@@ -391,16 +392,34 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <returns>An enumerable collection of features</returns>
         private IEnumerable<Feature> ParseFeatures(XmlElement query)
         {
-            List<Feature> features = new List<Feature>();
+            ISet<Feature> features = new HashSet<Feature>();
             foreach (XmlElement f in query.GetElementsByTagName("feature"))
             {
                 string var = f.GetAttribute("var");
-                if (String.IsNullOrEmpty(var))
+                if (string.IsNullOrEmpty(var))
                     continue;
                 features.Add(new Feature(var));
             }
 
             return features;
+        }
+
+        private IEnumerable<Field> ParseFields(XmlElement query)
+        {
+            ISet<Field> fields = new HashSet<Field>();
+
+            foreach (XmlElement e in query.GetElementsByTagName("field"))
+            {
+                string var = e.GetAttribute("var");
+                string label = e.GetAttribute("label");
+                string value = e.InnerText;
+
+                if (string.IsNullOrEmpty(var) || string.IsNullOrEmpty(label) || string.IsNullOrEmpty(value))
+                    continue;
+
+                fields.Add(new Field(var, label, value));
+            }
+            return fields;
         }
     }
 }
