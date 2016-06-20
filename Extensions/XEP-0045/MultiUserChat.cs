@@ -124,9 +124,15 @@ namespace Sharp.Xmpp.Extensions
         /// <summary>
         /// Set your nickname in the room.
         /// </summary>
-        public void SetNickName()
+        public void SetNickName(IRoomBasic room, string nickname)
         {
-            throw new NotImplementedException();
+            room.ThrowIfNull("room");
+            nickname.ThrowIfNullOrEmpty("nickname");
+
+            Jid request = new Jid(room.Jid.Domain, room.Jid.Node, nickname);
+            var msg = new Core.Presence(request, im.Jid, null, null, null);
+
+            im.SendPresence(new Im.Presence(msg));
         }
 
         /// <summary>
@@ -136,7 +142,6 @@ namespace Sharp.Xmpp.Extensions
         {
             throw new NotImplementedException();
         }
-        
 
         /// <summary>
         /// Allows owners and admins to grant privileges to an occupant.
@@ -155,35 +160,13 @@ namespace Sharp.Xmpp.Extensions
         }
 
         /// <summary>
-        /// Allows owners to modify the room name.
-        /// </summary>
-        public void EditRoomName()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Allows owners to modify the room description.
-        /// </summary>
-        public void EditRoomDescription()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Allows moderators (and above) to edit the room subject.
         /// </summary>
-        public void EditRoomSubject()
+        public void EditRoomSubject(IRoomBasic room, string subject)
         {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Allows owners to limit the number of occupants in a room.
-        /// </summary>
-        public void EditRoomSize()
-        {
-            throw new NotImplementedException();
+            subject.ThrowIfNull("subject");
+            Im.Message msg = new Im.Message(room.Jid, null, subject, null, MessageType.Groupchat);
+            im.SendMessage(msg);
         }
 
         /// <summary>
