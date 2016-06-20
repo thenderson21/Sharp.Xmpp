@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Xml;
 
-namespace Sharp.Xmpp.Extensions.XEP_0045
+namespace Sharp.Xmpp.Extensions
 {
     /// <summary>
     /// Implements the message history request object as described in XEP-0045.

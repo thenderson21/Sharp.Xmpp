@@ -7,7 +7,7 @@ using System.Xml;
 using Sharp.Xmpp.Core;
 using Sharp.Xmpp.Im;
 
-namespace Sharp.Xmpp.Extensions.XEP_0045
+namespace Sharp.Xmpp.Extensions
 {
     internal class MultiUserChat : XmppExtension
     {

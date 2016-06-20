@@ -1,4 +1,4 @@
-﻿namespace Sharp.Xmpp.Extensions.XEP_0045
+﻿namespace Sharp.Xmpp.Extensions
 {
     /// <summary>
     /// Describes whether a conference room requires a membership to enter.

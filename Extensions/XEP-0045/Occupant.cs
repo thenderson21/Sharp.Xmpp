@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sharp.Xmpp.Extensions.XEP_0045
+namespace Sharp.Xmpp.Extensions
 {
     /// <summary>
     /// Represents an participant in a group chat.

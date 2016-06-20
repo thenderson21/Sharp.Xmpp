@@ -1,4 +1,4 @@
-﻿namespace Sharp.Xmpp.Extensions.XEP_0045
+﻿namespace Sharp.Xmpp.Extensions
 {
     /// <summary>
     /// Identifiers used to describe objects in objects in the MUC Namespace

@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net.Security;
-using Sharp.Xmpp.Extensions.XEP_0045;
 
 namespace Sharp.Xmpp.Client
 {
@@ -27,7 +26,7 @@ namespace Sharp.Xmpp.Client
 
         /// <summary>
         /// The instance of the XmppIm class used for implementing the basic messaging
-        /// and presence funcionality.
+        /// and presence functionality.
         /// </summary>
         private XmppIm im;
 
@@ -37,7 +36,7 @@ namespace Sharp.Xmpp.Client
         private SoftwareVersion version;
 
         /// <summary>
-        /// Provides access to the 'Service Discovery' XMPP extension funtionality.
+        /// Provides access to the 'Service Discovery' XMPP extension functionality.
         /// </summary>
         private ServiceDiscovery sdisco;
 
@@ -62,12 +61,12 @@ namespace Sharp.Xmpp.Client
         private Attention attention;
 
         /// <summary>
-        /// Provides access to the 'Entity Time' XMPP extension funcionality.
+        /// Provides access to the 'Entity Time' XMPP extension functionality.
         /// </summary>
         private EntityTime time;
 
         /// <summary>
-        /// Provides access to the 'Blocking Command' XMPP extension funcionality.
+        /// Provides access to the 'Blocking Command' XMPP extension functionality.
         /// </summary>
         private BlockingCommand block;
 

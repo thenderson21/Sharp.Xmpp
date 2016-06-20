@@ -1,4 +1,4 @@
-﻿namespace Sharp.Xmpp.Extensions.XEP_0045
+﻿namespace Sharp.Xmpp.Extensions
 {
     /// <summary>
     /// Describes the role of a participant in a group chat.

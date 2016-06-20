@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 
-namespace Sharp.Xmpp.Extensions.XEP_0045
+namespace Sharp.Xmpp.Extensions
 {
     /// <summary>
     /// Represents an instance of a conference room as defined in XEP-0045.

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sharp.Xmpp.Extensions.XEP_0045
+namespace Sharp.Xmpp.Extensions
 {
     /// <summary>
     /// Room information provided upon inspection.
