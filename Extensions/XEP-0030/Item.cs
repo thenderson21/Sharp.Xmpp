@@ -36,6 +36,35 @@ namespace Sharp.Xmpp.Extensions
         }
 
         /// <summary>
+        /// The nickname of the item. This may be null.
+        /// </summary>
+        public string Nick
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// The affiliation of the item. This may be null.
+        /// </summary>
+
+        public string Affiliation
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// The role of the item. This may be null.
+        /// </summary>
+
+        public string Role
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the Item class.
         /// </summary>
         /// <param name="jid">The JID of the item.</param>
@@ -49,6 +78,29 @@ namespace Sharp.Xmpp.Extensions
             Jid = jid;
             Node = node;
             Name = name;
+            Affiliation = null;
+            Nick = null;
+            Role = null;
+        }
+
+        /// <summary>
+        /// Initialised a new instance of the item class.
+        /// This instance is used for member list creation and modification.
+        /// </summary>
+        /// <param name="affiliation">A long-lived association or connection with a room.</param>
+        /// <param name="jid">JID</param>
+        /// <param name="nickname">Occupant nickname</param>
+        /// <param name="role">Privilege level within a room.</param>
+        public Item(string affiliation, Jid jid, string nickname = null, string role = null)
+        {
+            affiliation.ThrowIfNull("affiliation");
+            jid.ThrowIfNull("jid");
+            Affiliation = affiliation;
+            Jid = jid;
+            Nick = nickname;
+            Role = role;
+            Node = null;
+            Name = null;
         }
     }
 }

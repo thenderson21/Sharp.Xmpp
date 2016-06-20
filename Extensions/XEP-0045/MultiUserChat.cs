@@ -9,7 +9,7 @@ using Sharp.Xmpp.Im;
 
 namespace Sharp.Xmpp.Extensions.XEP_0045
 {
-    internal class MultiUserChat : XmppExtension, IInputFilter<Im.Message>
+    internal class MultiUserChat : XmppExtension
     {
         public MultiUserChat(XmppIm im) : base(im)
         {
@@ -25,7 +25,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
             get
             {
                 return new string[] {
-                    "http://jabber.org/protocol/muc"
+                    MucNs.NsMain
                 };
             }
         }
@@ -45,11 +45,6 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         public override void Initialize()
         {
             base.Initialize();
-        }
-
-        public bool Input(Im.Message stanza)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -87,7 +82,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// </summary>
         public void JoinRoom(Jid jid, string nickname)
         {
-            XmlElement elem = Xml.Element("x", "http://jabber.org/protocol/muc");
+            XmlElement elem = Xml.Element("x", MucNs.NsMain);
             Jid joinRequest = new Jid(jid.Domain, jid.Node, nickname);
             var msg = new Core.Presence(joinRequest, im.Jid, null, null, elem);
 
@@ -95,43 +90,35 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         }
 
         /// <summary>
-        /// Returns previous chat room messages.
+        /// Requests previous chat room messages.
         /// </summary>
-        public void GetMessageLog()
+        public void GetMessageLog(Jid target, History options)
         {
-            throw new NotImplementedException();
+            XmlElement elem = Xml.Element("x", MucNs.NsMain);
+            elem.Child(options.Element);
+            var msg = new Core.Presence(target, im.Jid, null, null, elem);
+
+            im.SendPresence(new Im.Presence(msg));
         }
 
         /// <summary>
-        /// Returns occupants in the room.
+        /// Requests a list of occupants with a specific affiliation.
         /// </summary>
-        public void GetOccupants()
+        public void GetMembers(IRoomBasic room, Affiliation affiliation)
         {
-            throw new NotImplementedException();
+            var occupants = QueryOccupants(room, affiliation);
+
+            // TODO: convert list into an enumerable something to go to a viewmodel.
         }
 
         /// <summary>
-        /// Returns moderators in the room.
+        /// Requests a list of occupants with a specific role.
         /// </summary>
-        public void GetModerators()
+        public void GetMembers(IRoomBasic room, Role role)
         {
-            throw new NotImplementedException();
-        }
+            var occupants = QueryOccupants(room, role);
 
-        /// <summary>
-        /// Returns admins in the room.
-        /// </summary>
-        public void GetAdmins()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Returns owners in the room.
-        /// </summary>
-        public void GetOwners()
-        {
-            throw new NotImplementedException();
+            // TODO: convert list into an enumerable something to go to a viewmodel.
         }
 
         /// <summary>
@@ -149,100 +136,22 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         {
             throw new NotImplementedException();
         }
+        
 
         /// <summary>
-        /// Allows moderators (and above) to grant membership to users.
+        /// Allows owners and admins to grant privileges to an occupant.
         /// </summary>
-        /// <param name="jid">User Identifier</param>
-        public void GrantMembership(Jid jid)
+        public bool SetPrivilige(IRoomBasic room, string nickname, Role privilige, string reason = null)
         {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Allows moderators (and above) to revoke membership to users.
-        /// </summary>
-        /// <param name="jid">User Identifier</param>
-        public void RevokeMembership(Jid jid)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Allows moderators (and above) to kick occupants from the room.
-        /// </summary>
-        /// <param name="jid">User Identifier</param>
-        public void KickOccupant(Jid jid)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Allows admins to view the ban list.
-        /// </summary>
-        public void GetBanList()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Allows admins to ban an occupant.
-        /// </summary>
-        /// <param name="jid">User Identifier</param>
-        public void Ban(Jid jid)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Allows admins to unban an occupant.
-        /// </summary>
-        /// <param name="jid">User Identifier</param>
-        public void Unban(Jid jid)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Returns a list of occupants with voice privileges.
-        /// </summary>
-        public void GetVoiceList()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Allows admins to grant voice permissions to occupant.
-        /// </summary>
-        /// <param name="jid">User Identifier</param>
-        public void GrantVoice(Jid jid)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Allows admins to revoke voice permissions to occupant.
-        /// </summary>
-        /// <param name="jid">User Identifier</param>
-        public void RevokeVoice(Jid jid)
-        {
-            throw new NotImplementedException();
+            return PostPriviligeChange(room, nickname, privilige, reason);
         }
 
         /// <summary>
         /// Allows owners and admins to grant privileges to an occupant.
         /// </summary>
-        public void GrantPrivilege()
+        public bool SetPrivilige(IRoomBasic room, string nickname, Affiliation privilige, string reason = null)
         {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Allows owners and admins to revoke privileges to an occupant.
-        /// </summary>
-        public void RevokePrivilege()
-        {
-            throw new NotImplementedException();
+            return PostPriviligeChange(room, nickname, privilige, reason);
         }
 
         /// <summary>
@@ -280,9 +189,153 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
         /// <summary>
         /// Allows owners to destroy the room.
         /// </summary>
-        public void DestroyRoom()
+        public bool DestroyRoom(IRoomBasic room, string reason = null)
         {
-            throw new NotImplementedException();
+            room.ThrowIfNull("room");
+
+            var item = Xml.Element("destroy")
+                    .Attr("jid", room.Jid.ToString());
+
+            if (!string.IsNullOrWhiteSpace(reason))
+                item.Child(Xml.Element("reason").Text(reason));
+
+            var queryElement = Xml.Element("query", MucNs.NsOwner)
+                .Child(item);
+
+            Iq iq = im.IqRequest(IqType.Get, room.Jid, im.Jid, queryElement);
+            return iq.Type == IqType.Result;
+        }
+
+        private bool PostPriviligeChange(IRoomBasic room, Jid user, Affiliation affiliation, string reason)
+        {
+            room.ThrowIfNull("room");
+            user.ThrowIfNull("user");
+
+            var item = Xml.Element("item")
+                    .Attr("affiliation", affiliation.ToString().ToLower())
+                    .Attr("jid", user.ToString());
+
+            if (!string.IsNullOrWhiteSpace(reason))
+                item.Child(Xml.Element("reason").Text(reason));
+
+            var queryElement = Xml.Element("query", MucNs.NsAdmin)
+                .Child(item);
+
+            Iq iq = im.IqRequest(IqType.Get, room.Jid, im.Jid, queryElement);
+            return iq.Type == IqType.Result;
+        }
+
+        private bool PostPriviligeChange(IRoomBasic room, string nickname, Role role, string reason)
+        {
+            room.ThrowIfNull("room");
+            nickname.ThrowIfNull("nickname");
+
+            var item = Xml.Element("item")
+                    .Attr("role", role.ToString().ToLower())
+                    .Attr("nick", nickname);
+
+            if (!string.IsNullOrWhiteSpace(reason))
+                item.Child(Xml.Element("reason").Text(reason));
+
+            var queryElement = Xml.Element("query", MucNs.NsAdmin)
+                .Child(item);
+
+            Iq iq = im.IqRequest(IqType.Get, room.Jid, im.Jid, queryElement);
+            return iq.Type == IqType.Result;
+        }
+
+        /// <summary>
+        /// Queries for occupants in a room,
+        /// This will fail if you do not have permissions.
+        /// </summary>
+        /// <param name="room">Chat room to query</param>
+        /// <param name="affiliation">Queried user affiliation</param>
+        /// <returns>An enumerable collection of items of the XMPP entity
+        /// with the specified IRoom.</returns>
+        /// <exception cref="ArgumentNullException">The IRoom jid parameter
+        /// is null.</exception>
+        /// <exception cref="NotSupportedException">The query could not be
+        /// performed or the response was invalid.</exception>
+        private IEnumerable<Item> QueryOccupants(IRoomBasic room, Affiliation affiliation)
+        {
+            room.ThrowIfNull("room");
+            var queryElement = Xml.Element("query", MucNs.NsAdmin)
+                .Child(Xml.Element("item").Attr("affiliation", affiliation.ToString().ToLower()));
+
+            Iq iq = im.IqRequest(IqType.Get, room.Jid, im.Jid, queryElement);
+            if (iq.Type != IqType.Result)
+                throw new NotSupportedException("Could not query items: " + iq);
+            // Parse the result.
+            var query = iq.Data["query"];
+            if (query == null || query.NamespaceURI != MucNs.NsAdmin)
+                throw new NotSupportedException("Erroneous response: " + iq);
+            ISet<Item> items = new HashSet<Item>();
+            foreach (XmlElement e in query.GetElementsByTagName("item"))
+            {
+                string _jid = e.GetAttribute("jid"),
+                    _affiliation = e.GetAttribute("affiliation"),
+                    _nick = e.GetAttribute("nick"),
+                    _role = e.GetAttribute("role");
+                if (string.IsNullOrEmpty(_jid) | string.IsNullOrEmpty(_affiliation))
+                    continue;
+                try
+                {
+                    items.Add(new Item(_affiliation, _jid, _nick, _role));
+                }
+                catch (ArgumentException)
+                {
+                    // The JID is malformed, ignore the item.
+                }
+            }
+
+            return items;
+        }
+
+        /// <summary>
+        /// Queries for occupants in a room,
+        /// This will fail if you do not have permissions.
+        /// </summary>
+        /// <param name="room">Chat room to query</param>
+        /// <param name="role">Queried user role</param>
+        /// <returns>An enumerable collection of items of the XMPP entity
+        /// with the specified IRoom.</returns>
+        /// <exception cref="ArgumentNullException">The IRoom jid parameter
+        /// is null.</exception>
+        /// <exception cref="NotSupportedException">The query could not be
+        /// performed or the response was invalid.</exception>
+        private IEnumerable<Item> QueryOccupants(IRoomBasic room, Role role)
+        {
+            room.ThrowIfNull("room");
+            var queryElement = Xml.Element("query", MucNs.NsAdmin)
+                .Child(Xml.Element("item").Attr("role", role.ToString().ToLower()));
+
+            Iq iq = im.IqRequest(IqType.Get, room.Jid, im.Jid, queryElement);
+            if (iq.Type != IqType.Result)
+                throw new NotSupportedException("Could not query items: " + iq);
+            // Parse the result.
+            var query = iq.Data["query"];
+            if (query == null || query.NamespaceURI != MucNs.NsAdmin)
+                throw new NotSupportedException("Erroneous response: " + iq);
+            ISet<Item> items = new HashSet<Item>();
+            foreach (XmlElement e in query.GetElementsByTagName("item"))
+            {
+                string _jid = e.GetAttribute("jid"),
+                    _affiliation = e.GetAttribute("affiliation"),
+                    _nick = e.GetAttribute("nick"),
+                    _role = e.GetAttribute("role");
+                if (string.IsNullOrEmpty(_jid) | string.IsNullOrEmpty(_affiliation))
+                    continue;
+                try
+                {
+                    items.Add(new Item(_affiliation, _jid, _nick, _role));
+                }
+                catch (ArgumentException)
+                {
+                    // The JID is malformed, ignore the item.
+                }
+            }
+
+            return items;
         }
 
         /// <summary>
@@ -346,7 +399,7 @@ namespace Sharp.Xmpp.Extensions.XEP_0045
             Identity id = ParseIdentity(query);
             IEnumerable<Feature> features = ParseFeatures(query);
             IEnumerable<Field> fields = ParseFields(query);
-            
+
             return new RoomInfoExtended(roomInfo, id.Name, features, fields);
         }
 

@@ -1700,6 +1700,23 @@ namespace Sharp.Xmpp.Client
         }
 
         /// <summary>
+        /// Sends a request to get X previous messages.
+        /// </summary>
+        /// <param name="jid">target room/group member</param>
+        /// <param name="option">How long to look back</param>
+        public void GetGroupChatLog(Jid jid, History option)
+        {
+            AssertValid();
+            groupChat.GetMessageLog(jid, option);
+        }
+
+        public void GetRoomMembers(IRoomBasic chatRoom)
+        {
+            AssertValid();
+            groupChat.GetMembers(chatRoom, Affiliation.Member);
+        }
+
+        /// <summary>
         /// Closes the connection with the XMPP server. This automatically disposes
         /// of the object.
         /// </summary>
