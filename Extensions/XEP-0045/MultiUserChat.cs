@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Sharp.Xmpp.Core;
+using Sharp.Xmpp.Extensions.Dataforms;
 using Sharp.Xmpp.Im;
 
 namespace Sharp.Xmpp.Extensions
@@ -52,7 +53,7 @@ namespace Sharp.Xmpp.Extensions
         /// </summary>
         /// <param name="chatService">JID of the chat service (depends on server)</param>
         /// <returns>List of Room JIDs</returns>
-        public IEnumerable<IRoomBasic> DiscoverRooms(Jid chatService)
+        public IEnumerable<RoomInfoBasic> DiscoverRooms(Jid chatService)
         {
             chatService.ThrowIfNull("chatService");
             return QueryRooms(chatService);
@@ -63,18 +64,10 @@ namespace Sharp.Xmpp.Extensions
         /// </summary>
         /// <param name="chatRoom">Existing room info</param>
         /// <returns>Information about room</returns>
-        public IRoom GetRoomInfo(IRoomBasic chatRoom)
+        public RoomInfoExtended GetRoomInfo(Jid chatRoom)
         {
             chatRoom.ThrowIfNull("chatRoom");
             return QueryRoom(chatRoom);
-        }
-
-        /// <summary>
-        /// Joins or creates new room using the specified room
-        /// </summary>
-        public void JoinRoom(IRoomBasic room, string nickname)
-        {
-            JoinRoom(room.Jid, nickname);
         }
 
         /// <summary>
@@ -104,32 +97,28 @@ namespace Sharp.Xmpp.Extensions
         /// <summary>
         /// Requests a list of occupants with a specific affiliation.
         /// </summary>
-        public void GetMembers(IRoomBasic room, Affiliation affiliation)
+        public IEnumerable<Item> GetMembers(Jid room, Affiliation affiliation)
         {
-            var occupants = QueryOccupants(room, affiliation);
-
-            // TODO: convert list into an enumerable something to go to a viewmodel.
+            return QueryOccupants(room, affiliation);
         }
 
         /// <summary>
         /// Requests a list of occupants with a specific role.
         /// </summary>
-        public void GetMembers(IRoomBasic room, Role role)
+        public IEnumerable<Item> GetMembers(Jid room, Role role)
         {
-            var occupants = QueryOccupants(room, role);
-
-            // TODO: convert list into an enumerable something to go to a viewmodel.
+            return QueryOccupants(room, role);
         }
 
         /// <summary>
         /// Set your nickname in the room.
         /// </summary>
-        public void SetNickName(IRoomBasic room, string nickname)
+        public void SetNickName(Jid room, string nickname)
         {
             room.ThrowIfNull("room");
             nickname.ThrowIfNullOrEmpty("nickname");
 
-            Jid request = new Jid(room.Jid.Domain, room.Jid.Node, nickname);
+            Jid request = new Jid(room.Domain, room.Node, nickname);
             var msg = new Core.Presence(request, im.Jid, null, null, null);
 
             im.SendPresence(new Im.Presence(msg));
@@ -146,38 +135,45 @@ namespace Sharp.Xmpp.Extensions
         /// <summary>
         /// Allows owners and admins to grant privileges to an occupant.
         /// </summary>
-        public bool SetPrivilige(IRoomBasic room, string nickname, Role privilige, string reason = null)
+        public bool SetPrivilege(Jid room, string nickname, Role privilege, string reason = null)
         {
-            return PostPriviligeChange(room, nickname, privilige, reason);
+            return PostPrivilegeChange(room, nickname, privilege, reason);
         }
 
         /// <summary>
         /// Allows owners and admins to grant privileges to an occupant.
         /// </summary>
-        public bool SetPrivilige(IRoomBasic room, string nickname, Affiliation privilige, string reason = null)
+        public bool SetPrivilege(Jid room, string nickname, Affiliation privilege, string reason = null)
         {
-            return PostPriviligeChange(room, nickname, privilige, reason);
+            return PostPrivilegeChange(room, nickname, privilege, reason);
+        }
+
+        public void ModifyRoomConfig(Jid room, RegistrationCallback callback)
+        {
+            RequestForm form = RequestRoomConfigForm(room);
+            SubmitForm submit = callback.Invoke(form);
+            SubmitRoomConfigForm(room, submit);
         }
 
         /// <summary>
         /// Allows moderators (and above) to edit the room subject.
         /// </summary>
-        public void EditRoomSubject(IRoomBasic room, string subject)
+        public void EditRoomSubject(Jid room, string subject)
         {
             subject.ThrowIfNull("subject");
-            Im.Message msg = new Im.Message(room.Jid, null, subject, null, MessageType.Groupchat);
+            Im.Message msg = new Im.Message(room, null, subject, null, MessageType.Groupchat);
             im.SendMessage(msg);
         }
 
         /// <summary>
         /// Allows owners to destroy the room.
         /// </summary>
-        public bool DestroyRoom(IRoomBasic room, string reason = null)
+        public bool DestroyRoom(Jid room, string reason = null)
         {
             room.ThrowIfNull("room");
 
             var item = Xml.Element("destroy")
-                    .Attr("jid", room.Jid.ToString());
+                    .Attr("jid", room.ToString());
 
             if (!string.IsNullOrWhiteSpace(reason))
                 item.Child(Xml.Element("reason").Text(reason));
@@ -185,11 +181,37 @@ namespace Sharp.Xmpp.Extensions
             var queryElement = Xml.Element("query", MucNs.NsOwner)
                 .Child(item);
 
-            Iq iq = im.IqRequest(IqType.Get, room.Jid, im.Jid, queryElement);
+            Iq iq = im.IqRequest(IqType.Get, room, im.Jid, queryElement);
             return iq.Type == IqType.Result;
         }
 
-        private bool PostPriviligeChange(IRoomBasic room, Jid user, Affiliation affiliation, string reason)
+        private RequestForm RequestRoomConfigForm(Jid room)
+        {
+            Iq iq = im.IqRequest(IqType.Get, room, im.Jid, Xml.Element("query", MucNs.NsOwner));
+            if (iq.Type != IqType.Result)
+                throw new NotSupportedException("Could not query features: " + iq);
+
+            // Parse the result.
+            var query = iq.Data["query"];
+            if (query == null || query.NamespaceURI != MucNs.NsOwner)
+                throw new NotSupportedException("Erroneous response: " + iq);
+            return DataFormFactory.Create(query["x"]) as RequestForm;
+        }
+
+        private void SubmitRoomConfigForm(Jid room, SubmitForm configForm)
+        {
+            // Construct the response element.
+            var query = Xml.Element("query", MucNs.NsOwner);
+            var xml = Xml.Element("x", "jabber:x:data");
+            xml.Child(configForm.ToXmlElement());
+            query.Child(xml);
+
+            Iq iq = im.IqRequest(IqType.Set, room, im.Jid, query);
+            if (iq.Type == IqType.Error)
+                throw Util.ExceptionFromError(iq, "The configuration changes could not be completed.");
+        }
+
+        private bool PostPrivilegeChange(Jid room, Jid user, Affiliation affiliation, string reason)
         {
             room.ThrowIfNull("room");
             user.ThrowIfNull("user");
@@ -204,11 +226,11 @@ namespace Sharp.Xmpp.Extensions
             var queryElement = Xml.Element("query", MucNs.NsAdmin)
                 .Child(item);
 
-            Iq iq = im.IqRequest(IqType.Get, room.Jid, im.Jid, queryElement);
+            Iq iq = im.IqRequest(IqType.Get, room, im.Jid, queryElement);
             return iq.Type == IqType.Result;
         }
 
-        private bool PostPriviligeChange(IRoomBasic room, string nickname, Role role, string reason)
+        private bool PostPrivilegeChange(Jid room, string nickname, Role role, string reason)
         {
             room.ThrowIfNull("room");
             nickname.ThrowIfNull("nickname");
@@ -223,7 +245,7 @@ namespace Sharp.Xmpp.Extensions
             var queryElement = Xml.Element("query", MucNs.NsAdmin)
                 .Child(item);
 
-            Iq iq = im.IqRequest(IqType.Get, room.Jid, im.Jid, queryElement);
+            Iq iq = im.IqRequest(IqType.Get, room, im.Jid, queryElement);
             return iq.Type == IqType.Result;
         }
 
@@ -239,13 +261,13 @@ namespace Sharp.Xmpp.Extensions
         /// is null.</exception>
         /// <exception cref="NotSupportedException">The query could not be
         /// performed or the response was invalid.</exception>
-        private IEnumerable<Item> QueryOccupants(IRoomBasic room, Affiliation affiliation)
+        private IEnumerable<Item> QueryOccupants(Jid room, Affiliation affiliation)
         {
             room.ThrowIfNull("room");
             var queryElement = Xml.Element("query", MucNs.NsAdmin)
                 .Child(Xml.Element("item").Attr("affiliation", affiliation.ToString().ToLower()));
 
-            Iq iq = im.IqRequest(IqType.Get, room.Jid, im.Jid, queryElement);
+            Iq iq = im.IqRequest(IqType.Get, room, im.Jid, queryElement);
             if (iq.Type != IqType.Result)
                 throw new NotSupportedException("Could not query items: " + iq);
             // Parse the result.
@@ -286,13 +308,13 @@ namespace Sharp.Xmpp.Extensions
         /// is null.</exception>
         /// <exception cref="NotSupportedException">The query could not be
         /// performed or the response was invalid.</exception>
-        private IEnumerable<Item> QueryOccupants(IRoomBasic room, Role role)
+        private IEnumerable<Item> QueryOccupants(Jid room, Role role)
         {
             room.ThrowIfNull("room");
             var queryElement = Xml.Element("query", MucNs.NsAdmin)
                 .Child(Xml.Element("item").Attr("role", role.ToString().ToLower()));
 
-            Iq iq = im.IqRequest(IqType.Get, room.Jid, im.Jid, queryElement);
+            Iq iq = im.IqRequest(IqType.Get, room, im.Jid, queryElement);
             if (iq.Type != IqType.Result)
                 throw new NotSupportedException("Could not query items: " + iq);
             // Parse the result.
@@ -335,12 +357,12 @@ namespace Sharp.Xmpp.Extensions
         {
             jid.ThrowIfNull("jid");
             Iq iq = im.IqRequest(IqType.Get, jid, im.Jid,
-                Xml.Element("query", "http://jabber.org/protocol/disco#items"));
+                Xml.Element("query", MucNs.NsRequestItems));
             if (iq.Type != IqType.Result)
                 throw new NotSupportedException("Could not query items: " + iq);
             // Parse the result.
             var query = iq.Data["query"];
-            if (query == null || query.NamespaceURI != "http://jabber.org/protocol/disco#items")
+            if (query == null || query.NamespaceURI != MucNs.NsRequestItems)
                 throw new NotSupportedException("Erroneous response: " + iq);
             ISet<RoomInfoBasic> items = new HashSet<RoomInfoBasic>();
             foreach (XmlElement e in query.GetElementsByTagName("item"))
@@ -365,25 +387,25 @@ namespace Sharp.Xmpp.Extensions
         /// <summary>
         /// Queries the XMPP entity with the JID in the specified RoomInfo for item information.
         /// </summary>
-        /// <param name="roomInfo">Holds the JID of the XMPP entity to query.</param>
+        /// <param name="room">Holds the JID of the XMPP entity to query.</param>
         /// <returns>A more detailed description of the specified room.</returns>
-        private RoomInfoExtended QueryRoom(IRoomBasic roomInfo)
+        private RoomInfoExtended QueryRoom(Jid room)
         {
-            roomInfo.ThrowIfNull("roomInfo");
-            Iq iq = im.IqRequest(IqType.Get, roomInfo.Jid, im.Jid,
-                Xml.Element("query", "http://jabber.org/protocol/disco#info"));
+            room.ThrowIfNull("roomInfo");
+            Iq iq = im.IqRequest(IqType.Get, room, im.Jid,
+                Xml.Element("query", MucNs.NsRequestInfo));
             if (iq.Type != IqType.Result)
                 throw new NotSupportedException("Could not query features: " + iq);
             // Parse the result.
             var query = iq.Data["query"];
-            if (query == null || query.NamespaceURI != "http://jabber.org/protocol/disco#info")
+            if (query == null || query.NamespaceURI != MucNs.NsRequestInfo)
                 throw new NotSupportedException("Erroneous response: " + iq);
 
             Identity id = ParseIdentity(query);
-            IEnumerable<Feature> features = ParseFeatures(query);
-            IEnumerable<Field> fields = ParseFields(query);
+            IEnumerable<DataField> features = ParseFields(query, "feature");
+            IEnumerable<DataField> fields = ParseFields(query, "field");
 
-            return new RoomInfoExtended(roomInfo, id.Name, features, fields);
+            return new RoomInfoExtended(room, id.Name, features, fields);
         }
 
         /// <summary>
@@ -416,35 +438,15 @@ namespace Sharp.Xmpp.Extensions
         /// Parses the Identity element and returns a list of the identity's features.
         /// </summary>
         /// <param name="query">The query result</param>
-        /// <returns>An enumerable collection of features</returns>
-        private IEnumerable<Feature> ParseFeatures(XmlElement query)
+        /// <param name="tagName">The tag name of the objects</param>
+        /// <returns>An enumerable collection of DataFields</returns>
+        private IEnumerable<DataField> ParseFields(XmlElement query, string tagName)
         {
-            ISet<Feature> features = new HashSet<Feature>();
-            foreach (XmlElement f in query.GetElementsByTagName("feature"))
+            ISet<DataField> fields = new HashSet<DataField>();
+
+            foreach (XmlElement f in query.GetElementsByTagName(tagName))
             {
-                string var = f.GetAttribute("var");
-                if (string.IsNullOrEmpty(var))
-                    continue;
-                features.Add(new Feature(var));
-            }
-
-            return features;
-        }
-
-        private IEnumerable<Field> ParseFields(XmlElement query)
-        {
-            ISet<Field> fields = new HashSet<Field>();
-
-            foreach (XmlElement e in query.GetElementsByTagName("field"))
-            {
-                string var = e.GetAttribute("var");
-                string label = e.GetAttribute("label");
-                string value = e.InnerText;
-
-                if (string.IsNullOrEmpty(var) || string.IsNullOrEmpty(label) || string.IsNullOrEmpty(value))
-                    continue;
-
-                fields.Add(new Field(var, label, value));
+                fields.Add((new DataField(f)));
             }
 
             return fields;

@@ -1669,7 +1669,7 @@ namespace Sharp.Xmpp.Client
         /// </summary>
         /// <param name="chatService">JID of the chat service (depends on server)</param>
         /// <returns>List of Room JIDs</returns>
-        public IEnumerable<IRoomBasic> DiscoverRooms(Jid chatService)
+        public IEnumerable<RoomInfoBasic> DiscoverRooms(Jid chatService)
         {
             AssertValid();
             return groupChat.DiscoverRooms(chatService);
@@ -1681,7 +1681,7 @@ namespace Sharp.Xmpp.Client
         /// </summary>
         /// <param name="chatRoom">Room Identifier</param>
         /// <returns>Information about room</returns>
-        public IRoom GetRoomInfo(IRoomBasic chatRoom)
+        public RoomInfoExtended GetRoomInfo(Jid chatRoom)
         {
             AssertValid();
             return groupChat.GetRoomInfo(chatRoom);
@@ -1692,7 +1692,7 @@ namespace Sharp.Xmpp.Client
         /// </summary>
         /// <param name="chatRoom">Room Identifier</param>
         /// <param name="nickname">Desired Nickname</param>
-        public void JoinRoom(IRoomBasic chatRoom, string nickname)
+        public void JoinRoom(Jid chatRoom, string nickname)
         {
             AssertValid();
             groupChat.JoinRoom(chatRoom, nickname);
@@ -1709,10 +1709,21 @@ namespace Sharp.Xmpp.Client
             groupChat.GetMessageLog(jid, option);
         }
 
-        public void GetRoomMembers(IRoomBasic chatRoom)
+        public void GetRoomMembers(Jid chatRoom)
         {
             AssertValid();
             groupChat.GetMembers(chatRoom, Affiliation.Member);
+        }
+
+        /// <summary>
+        /// Allows a user to modify the configuration of a specified room.
+        /// Only "Room Owners" may edit room config.
+        /// </summary>
+        /// <param name="room">JID of the room.</param>
+        /// <param name="callback">Room Configuration callback.</param>
+        public void ModifyRoomConfig(Jid room, RegistrationCallback callback)
+        {
+            groupChat.ModifyRoomConfig(room, callback);
         }
 
         /// <summary>

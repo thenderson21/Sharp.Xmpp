@@ -4,13 +4,14 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Sharp.Xmpp.Extensions.Dataforms;
 
 namespace Sharp.Xmpp.Extensions
 {
     /// <summary>
     /// Room information provided upon inspection.
     /// </summary>
-    public class RoomInfoExtended : RoomInfoBasic, IRoom
+    public class RoomInfoExtended : RoomInfoBasic
     {
         private string description;
         private string subject;
@@ -55,7 +56,7 @@ namespace Sharp.Xmpp.Extensions
             occupants = new HashSet<Jid>();
         }
 
-        internal RoomInfoExtended(Jid jid, string name, IEnumerable<Feature> features, IEnumerable<Field> fields)
+        internal RoomInfoExtended(Jid jid, string name, IEnumerable<DataField> features, IEnumerable<DataField> fields)
              : base(jid, name)
         {
             Visibility = RoomVisibility.Undefined;
@@ -76,16 +77,8 @@ namespace Sharp.Xmpp.Extensions
             contactAddresses = new List<Jid>();
             occupants = new HashSet<Jid>();
 
-            IntialiseRoomSettings(features);
+            IntialiseRoomFeatures(features);
             IntialiseRoomSettings(fields);
-        }
-
-        internal RoomInfoExtended(IRoomBasic room, string name,
-            IEnumerable<Feature> features, IEnumerable<Field> fields)
-             : this(room.Jid, room.Name, features, fields)
-        {
-            if (Name != name)
-                Name = name;
         }
 
         /// <summary>
@@ -242,11 +235,11 @@ namespace Sharp.Xmpp.Extensions
         /// Initialises the room settings using the provided features.
         /// </summary>
         /// <param name="features">Room features</param>
-        private void IntialiseRoomSettings(IEnumerable<Feature> features)
+        private void IntialiseRoomFeatures(IEnumerable<DataField> features)
         {
-            foreach (Feature f in features)
+            foreach (DataField f in features)
             {
-                switch (f.Var)
+                switch (f.Name)
                 {
                     case MucNs.FeatureProtectionUnsecured:
                         Protection = RoomProtection.Unsecured;
@@ -294,46 +287,46 @@ namespace Sharp.Xmpp.Extensions
         /// Initialises the room settings using the provided fields.
         /// </summary>
         /// <param name="fields">Room fields</param>
-        private void IntialiseRoomSettings(IEnumerable<Field> fields)
+        private void IntialiseRoomSettings(IEnumerable<DataField> fields)
         {
-            foreach (Field f in fields)
-                switch (f.Var)
+            foreach (DataField f in fields)
+                switch (f.Name)
                 {
                     case MucNs.InfoDescription:
-                        Description = f.Value;
+                        Description = f.Values.FirstOrDefault();
                         break;
                     case MucNs.InfoChangeSubject:
-                        canChangeSubject = ConvertToBoolean(f.Value);
+                        canChangeSubject = ConvertToBoolean(f.Values.FirstOrDefault());
                         break;
                     case MucNs.InfoContactJid:
-                        contactAddresses.Add(new Jid(f.Value));
+                        contactAddresses.Add(new Jid(f.Values.FirstOrDefault()));
                         break;
                     case MucNs.InfoCreationDate:
-                        CreationDate = ConvertToDateTime(f.Value);
+                        CreationDate = ConvertToDateTime(f.Values.FirstOrDefault());
                         break;
                     case MucNs.InfoSubject:
-                        Subject = f.Value;
+                        Subject = f.Values.FirstOrDefault();
                         break;
                     case MucNs.InfoSubjectMod:
-                        canChangeSubject = ConvertToBoolean(f.Value);
+                        canChangeSubject = ConvertToBoolean(f.Values.FirstOrDefault());
                         break;
                     case MucNs.InfoOccupants:
-                        NumberOfOccupants = ConvertToInteger(f.Value);
+                        NumberOfOccupants = ConvertToInteger(f.Values.FirstOrDefault());
                         break;
                     case MucNs.InfoLdapGroup:
-                        LDAPGroup = f.Value;
+                        LDAPGroup = f.Values.FirstOrDefault();
                         break;
                     case MucNs.InfoLanguage:
-                        Language = ConvertToCultureInfo(f.Value);
+                        Language = ConvertToCultureInfo(f.Values.FirstOrDefault());
                         break;
                     case MucNs.InfoLogs:
-                        LogUrl = f.Value;
+                        LogUrl = f.Values.FirstOrDefault();
                         break;
                     case MucNs.InfoPubSub:
-                        pubSubNode = f.Value;
+                        pubSubNode = f.Values.FirstOrDefault();
                         break;
                     case MucNs.MaxHistoryFetch:
-                        maxHistoryFetch = ConvertToInteger(f.Value);
+                        maxHistoryFetch = ConvertToInteger(f.Values.FirstOrDefault());
                         break;
                     default:
                         break;

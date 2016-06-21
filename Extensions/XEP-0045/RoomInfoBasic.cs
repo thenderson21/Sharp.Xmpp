@@ -9,7 +9,7 @@ namespace Sharp.Xmpp.Extensions
     /// <summary>
     /// The most basic form of a chat room
     /// </summary>
-    public class RoomInfoBasic : IRoomBasic
+    public class RoomInfoBasic
     {
         private Jid jid;
         private string name;
@@ -28,16 +28,6 @@ namespace Sharp.Xmpp.Extensions
                 Name = jid.Node;
             else
                 Name = name;
-        }
-
-        /// <summary>
-        /// Create from an existing room info
-        /// </summary>
-        /// <param name="room">Existing room info</param>
-        public RoomInfoBasic(RoomInfoBasic room)
-        {
-            Jid = room.Jid;
-            Name = room.Name;
         }
 
         /// <summary>
