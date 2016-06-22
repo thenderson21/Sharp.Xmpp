@@ -23,6 +23,8 @@
 
         public const string NsUser = NsMain + "#user";
 
+        public const string NsRegister = NsMain + "#register";
+
         public const string NsRequest = NsMain + "#request";
 
         public const string NsRoomConfig = NsMain + "#roomconfig";

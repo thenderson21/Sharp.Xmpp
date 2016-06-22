@@ -457,6 +457,21 @@ namespace Sharp.Xmpp.Client
         }
 
         /// <summary>
+        /// The event that is raised when the subject is changed in a group chat.
+        /// </summary>
+        public event EventHandler<MessageEventArgs> GroupChatSubjectChanged
+        {
+            add
+            {
+                groupChat.SubjectChanged += value;
+            }
+            remove
+            {
+                groupChat.SubjectChanged -= value;
+            }
+        }
+
+        /// <summary>
         /// The event that is raised periodically for every file-transfer operation to
         /// inform subscribers of the progress of the operation.
         /// </summary>

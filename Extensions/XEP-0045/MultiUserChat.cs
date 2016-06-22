@@ -10,7 +10,7 @@ using Sharp.Xmpp.Im;
 
 namespace Sharp.Xmpp.Extensions
 {
-    internal class MultiUserChat : XmppExtension
+    internal class MultiUserChat : XmppExtension, IInputFilter<Im.Message>, IInputFilter<Im.Presence>
     {
         public MultiUserChat(XmppIm im) : base(im)
         {
@@ -43,9 +43,70 @@ namespace Sharp.Xmpp.Extensions
             }
         }
 
+        public event EventHandler<Im.MessageEventArgs> SubjectChanged;
+
+        public RegistrationCallback VoiceRequested;
+
         public override void Initialize()
         {
             base.Initialize();
+        }
+
+        public bool Input(Im.Message stanza)
+        {
+            // Things that could happen here:
+            // Receive Registration Request
+            // Receive Voice Request
+            // Group Chat Message 
+            // Group Chat History
+            // Subject Change
+
+            if (stanza.Subject != null)
+            {
+                SubjectChanged.Raise(this, new Im.MessageEventArgs(stanza.From, stanza));
+                return true;
+            }
+            
+            XmlElement xElement = stanza.Data["x"];
+            if (xElement != null && xElement.NamespaceURI == "jabber:x:data")
+                switch (xElement.FirstChild.Value)
+                {
+                    default:
+                        break;
+                    case MucNs.NsRequest:
+                        // Invoke Voice Request Submission callback/event.
+                        // 8.6 Approving Voice Requests
+                        if (VoiceRequested != null)
+                        {
+                            SubmitForm form = VoiceRequested.Invoke(new RequestForm(xElement));
+                            var message = new Core.Message(stanza.From, im.Jid, form.ToXmlElement());
+                            SendMessage(message);
+                            return true;
+                        }
+                        break;
+                    case MucNs.NsRegister:
+                        // Invoke Registration Request Submission callback/event.
+                        // 9.9 Approving Registration Requests
+                        // I'm unsure on how to implement this.
+                        // return true;
+                        break;
+                }
+
+            // Any message with a body can be managed by the IM extension
+            return false;
+        }
+
+        public bool Input(Im.Presence stanza)
+        {
+            // Things that could happen here:
+            // Unable to join - No nickname specified / Duplicate nickname exists
+            // Service Sends Notice of Membership
+            // Service Passes Along Changed Presence
+            // Service Updates Nick
+            // Invitations Received/WasDeclined
+
+            // Any message with an Availability status can be managed by the Presence extension
+            return false;
         }
 
         /// <summary>
@@ -131,7 +192,7 @@ namespace Sharp.Xmpp.Extensions
         {
             throw new NotImplementedException();
         }
-
+        
         /// <summary>
         /// Allows owners and admins to grant privileges to an occupant.
         /// </summary>
@@ -161,8 +222,8 @@ namespace Sharp.Xmpp.Extensions
         public void EditRoomSubject(Jid room, string subject)
         {
             subject.ThrowIfNull("subject");
-            Im.Message msg = new Im.Message(room, null, subject, null, MessageType.Groupchat);
-            im.SendMessage(msg);
+            Im.Message message = new Im.Message(room, null, subject, null, MessageType.Groupchat);
+            SendMessage(message);
         }
 
         /// <summary>
@@ -450,6 +511,11 @@ namespace Sharp.Xmpp.Extensions
             }
 
             return fields;
+        }
+
+        public void SendMessage(Core.Message message)
+        {
+            im.SendMessage(new Im.Message(message));
         }
     }
 }
