@@ -67,5 +67,16 @@ namespace Sharp.Xmpp.Extensions
             Affiliation = (Affiliation) Enum.Parse(typeof(Affiliation), affiliation, true);
             Role = (Role)Enum.Parse(typeof(Role), role, true);
         }
+
+        /// <summary>
+        /// Constructs an empty Occupant object.
+        /// </summary>
+        public Occupant()
+        {
+            GroupJid = null;
+            RealJid = null;
+            Role = Role.None;
+            Affiliation = Affiliation.None;
+        }
     }
 }

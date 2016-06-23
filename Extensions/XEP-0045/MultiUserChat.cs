@@ -173,7 +173,6 @@ namespace Sharp.Xmpp.Extensions
             im.SendPresence(msg);
         }
 
-
         /// <summary>
         /// Leaves the specified room.
         /// </summary>
@@ -255,6 +254,29 @@ namespace Sharp.Xmpp.Extensions
             RequestForm form = RequestRoomConfigForm(room);
             SubmitForm submit = callback.Invoke(form);
             SubmitRoomConfigForm(room, submit);
+        }
+
+        /// <summary>
+        /// Allows moderators to kick an occupant from the room.
+        /// </summary>
+        /// <param name="room">chat room</param>
+        /// <param name="nickname">user to kick</param>
+        /// <param name="reason">reason for kick</param>
+        public void KickOccupant(Jid room, string nickname, string reason)
+        {
+            XmlElement item = Xml.Element("item");
+            item.Attr("nick", nickname);
+            item.Attr("role", Role.None.ToString());
+
+            if (!string.IsNullOrEmpty(reason))
+                item.Child(Xml.Element("reason").Text(reason));
+
+            XmlElement query = Xml.Element("query", MucNs.NsAdmin)
+                .Child(item);
+
+            Iq iq = im.IqRequest(IqType.Set, room, im.Jid, query);
+            if (iq.Type != IqType.Result)
+                throw new NotSupportedException("Could not query features: " + iq);
         }
 
         /// <summary>

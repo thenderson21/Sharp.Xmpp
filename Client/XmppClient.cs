@@ -1755,6 +1755,17 @@ namespace Sharp.Xmpp.Client
         }
 
         /// <summary>
+        /// Allows moderators to kick an occupant from the room.
+        /// </summary>
+        /// <param name="chatRoom">chat room</param>
+        /// <param name="nickname">user to kick</param>
+        /// <param name="reason">reason for kick</param>
+        public void KickGroupOccupant(Jid chatRoom, string nickname, string reason = null)
+        {
+            groupChat.KickOccupant(chatRoom, nickname, reason);
+        }
+
+        /// <summary>
         /// Allows a user to modify the configuration of a specified room.
         /// Only "Room Owners" may edit room config.
         /// </summary>
