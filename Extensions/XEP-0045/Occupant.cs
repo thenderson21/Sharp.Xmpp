@@ -33,8 +33,39 @@ namespace Sharp.Xmpp.Extensions
         }
 
         /// <summary>
-        /// Permission level of the participant.
+        /// Member level of the participant.
         /// </summary>
         public Role Role { get; set; }
+
+        /// <summary>
+        /// Permission level of the participant.
+        /// </summary>
+        public Affiliation Affiliation { get; set; }
+
+        /// <summary>
+        /// Constructs a Occupant object.
+        /// </summary>
+        /// <param name="groupJid"></param>
+        /// <param name="affiliation"></param>
+        /// <param name="role"></param>
+        public Occupant(Jid groupJid, Affiliation affiliation, Role role)
+        {
+            GroupJid = groupJid;
+            Affiliation = affiliation;
+            Role = role;
+        }
+
+        /// <summary>
+        /// Constructs a Occupant object.
+        /// </summary>
+        /// <param name="groupJid"></param>
+        /// <param name="affiliation"></param>
+        /// <param name="role"></param>
+        public Occupant(Jid groupJid, string affiliation, string role)
+        {
+            GroupJid = groupJid;
+            Affiliation = (Affiliation) Enum.Parse(typeof(Affiliation), affiliation, true);
+            Role = (Role)Enum.Parse(typeof(Role), role, true);
+        }
     }
 }

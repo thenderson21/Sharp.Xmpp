@@ -95,6 +95,7 @@
     <Compile Include="Extensions\XEP-0004\Dataforms\XmlCollection.cs" />
     <Compile Include="Extensions\XEP-0020\FeatureNegotiation.cs" />
     <Compile Include="Extensions\XEP-0030\Item.cs" />
+    <Compile Include="Extensions\XEP-0045\GroupPresenceEventArgs.cs" />
     <Compile Include="Extensions\XEP-0045\History.cs" />
     <Compile Include="Extensions\XEP-0045\MultiUserChat.cs" />
     <Compile Include="Extensions\XEP-0045\MucNs.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="Extensions\XEP-0045\RoomPrivacy.cs" />
     <Compile Include="Extensions\XEP-0045\RoomProtection.cs" />
     <Compile Include="Extensions\XEP-0045\RoomVisibility.cs" />
+    <Compile Include="Extensions\XEP-0045\MucStatusType.cs" />
     <Compile Include="Extensions\XEP-0065\IPAddressExtensions.cs" />
     <Compile Include="Extensions\XEP-0065\Socks5Bytestreams.cs" />
     <Compile Include="Extensions\XEP-0065\Socks5\ATyp.cs" />

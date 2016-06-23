@@ -45,6 +45,8 @@ namespace Sharp.Xmpp.Extensions
 
         public event EventHandler<Im.MessageEventArgs> SubjectChanged;
 
+        public event EventHandler<GroupPresenceEventArgs> PrescenceChanged;
+
         public RegistrationCallback VoiceRequested;
 
         public override void Initialize()
@@ -68,7 +70,7 @@ namespace Sharp.Xmpp.Extensions
             }
             
             XmlElement xElement = stanza.Data["x"];
-            if (xElement != null && xElement.NamespaceURI == "jabber:x:data")
+            if (xElement != null && xElement.NamespaceURI == MucNs.NsXData)
                 switch (xElement.FirstChild.Value)
                 {
                     default:
@@ -105,6 +107,35 @@ namespace Sharp.Xmpp.Extensions
             // Service Updates Nick
             // Invitations Received/WasDeclined
 
+            XmlElement xElement = stanza.Data["x"];
+            if (xElement != null && xElement.NamespaceURI == MucNs.NsUser)
+            {
+                Occupant person = null;
+                foreach (XmlElement item in xElement.GetElementsByTagName("item"))
+                {
+                    // There is only every one item in a message here but, 
+                    // I don't have a better way of getting the first element as an element, not a node.
+                    person = new Occupant(
+                        item.GetAttribute("jid"), 
+                        item.GetAttribute("affiliation"), 
+                        item.GetAttribute("role"));
+                }
+
+                IList<MucStatusType> statusCodeList = new List<MucStatusType>();
+                foreach (XmlElement item in xElement.GetElementsByTagName("item"))
+                {
+                    string codeAttribute = item.GetAttribute("code");
+                    var code = (MucStatusType)Enum.Parse(typeof(MucStatusType), codeAttribute);
+                    statusCodeList.Add(code);
+                }
+
+                if (person != null)
+                {
+                    PrescenceChanged.Raise(this, new GroupPresenceEventArgs(person, statusCodeList));
+                    return true;
+                }
+            }
+
             // Any message with an Availability status can be managed by the Presence extension
             return false;
         }
@@ -132,15 +163,25 @@ namespace Sharp.Xmpp.Extensions
         }
 
         /// <summary>
-        /// Joins or creates new room using the specified room
+        /// Joins or creates new room using the specified room.
         /// </summary>
         public void JoinRoom(Jid jid, string nickname)
         {
             XmlElement elem = Xml.Element("x", MucNs.NsMain);
             Jid joinRequest = new Jid(jid.Domain, jid.Node, nickname);
-            var msg = new Core.Presence(joinRequest, im.Jid, null, null, elem);
+            var msg = new Im.Presence(joinRequest, im.Jid, PresenceType.Available, null, null, elem);
+            im.SendPresence(msg);
+        }
 
-            im.SendPresence(new Im.Presence(msg));
+
+        /// <summary>
+        /// Leaves the specified room.
+        /// </summary>
+        public void LeaveRoom(Jid jid, string nickname)
+        {
+            Jid groupSpecificJid = new Jid(jid.Domain, jid.Node, nickname);
+            var msg = new Im.Presence(jid, groupSpecificJid, PresenceType.Unavailable);
+            im.SendPresence(msg);
         }
 
         /// <summary>
@@ -263,7 +304,7 @@ namespace Sharp.Xmpp.Extensions
         {
             // Construct the response element.
             var query = Xml.Element("query", MucNs.NsOwner);
-            var xml = Xml.Element("x", "jabber:x:data");
+            var xml = Xml.Element("x", MucNs.NsXData);
             xml.Child(configForm.ToXmlElement());
             query.Child(xml);
 

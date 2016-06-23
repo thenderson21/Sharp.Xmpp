@@ -1,11 +1,17 @@
 ﻿namespace Sharp.Xmpp.Extensions
 {
     /// <summary>
-    /// Identifiers used to describe objects in objects in the MUC Namespace
+    /// Identifiers used to describe objects in objects in the MUC Namespace.
+    /// Really this wants to be layers classes of constants to simulate namespaces with strings,
+    /// But so far this only covers what needs to be used in MUC.
     /// </summary>
     internal class MucNs
     {
         private const string NsProtocol = "http://jabber.org/protocol/";
+
+        // Data Namespace
+
+        public const string NsXData = "jabber:x:data";
 
         // Service Discovery Namespaces
 

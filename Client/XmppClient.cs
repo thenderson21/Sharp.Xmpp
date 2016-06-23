@@ -472,6 +472,21 @@ namespace Sharp.Xmpp.Client
         }
 
         /// <summary>
+        /// The event that is raised when a participant's presence is changed in a group chat.
+        /// </summary>
+        public event EventHandler<GroupPresenceEventArgs> GroupPresenceChanged
+        {
+            add
+            {
+                groupChat.PrescenceChanged += value;
+            }
+            remove
+            {
+                groupChat.PrescenceChanged -= value;
+            }
+        }
+
+        /// <summary>
         /// The event that is raised periodically for every file-transfer operation to
         /// inform subscribers of the progress of the operation.
         /// </summary>
@@ -1711,6 +1726,15 @@ namespace Sharp.Xmpp.Client
         {
             AssertValid();
             groupChat.JoinRoom(chatRoom, nickname);
+        }
+
+        /// <summary>
+        /// Leaves the specified room.
+        /// </summary>
+        public void LeaveRoom(Jid chatRoom, string nickname)
+        {
+            AssertValid();
+            groupChat.LeaveRoom(chatRoom, nickname);
         }
 
         /// <summary>
