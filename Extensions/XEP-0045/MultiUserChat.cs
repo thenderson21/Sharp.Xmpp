@@ -68,7 +68,7 @@ namespace Sharp.Xmpp.Extensions
                 SubjectChanged.Raise(this, new Im.MessageEventArgs(stanza.From, stanza));
                 return true;
             }
-            
+
             XmlElement xElement = stanza.Data["x"];
             if (xElement != null && xElement.NamespaceURI == MucNs.NsXData)
                 switch (xElement.FirstChild.Value)
@@ -116,8 +116,8 @@ namespace Sharp.Xmpp.Extensions
                     // There is only every one item in a message here but, 
                     // I don't have a better way of getting the first element as an element, not a node.
                     person = new Occupant(
-                        item.GetAttribute("jid"), 
-                        item.GetAttribute("affiliation"), 
+                        item.GetAttribute("jid"),
+                        item.GetAttribute("affiliation"),
                         item.GetAttribute("role"));
                 }
 
@@ -195,10 +195,15 @@ namespace Sharp.Xmpp.Extensions
             im.SendPresence(new Im.Presence(msg));
         }
 
+        public void GetMembers(Jid room)
+        {
+            return QueryOccupants(room);
+        }
+
         /// <summary>
         /// Requests a list of occupants with a specific affiliation.
         /// </summary>
-        public IEnumerable<Item> GetMembers(Jid room, Affiliation affiliation)
+        public IEnumerable<Occupant> GetMembers(Jid room, Affiliation affiliation)
         {
             return QueryOccupants(room, affiliation);
         }
@@ -206,7 +211,7 @@ namespace Sharp.Xmpp.Extensions
         /// <summary>
         /// Requests a list of occupants with a specific role.
         /// </summary>
-        public IEnumerable<Item> GetMembers(Jid room, Role role)
+        public IEnumerable<Occupant> GetMembers(Jid room, Role role)
         {
             return QueryOccupants(room, role);
         }
@@ -228,11 +233,27 @@ namespace Sharp.Xmpp.Extensions
         /// <summary>
         /// Allows visitors to request membership to a room.
         /// </summary>
-        public void RequestMembership()
+        public void RequestVoice(Jid room, SubmitForm form)
         {
-            throw new NotImplementedException();
+            var xml = Xml.Element("x", MucNs.NsXData);
+            xml.Child(form.ToXmlElement());
+
+            var message = new Core.Message(room, im.Jid, xml);
+            SendMessage(message);
         }
-        
+
+        public void RequestRegistration(Jid room)
+        {
+            Iq iq = im.IqRequest(IqType.Get, room, im.Jid, Xml.Element("query", MucNs.NsOwner));
+            if (iq.Type != IqType.Result)
+                throw new NotSupportedException("Could not query features: " + iq);
+
+            // Parse the result.
+            var query = iq.Data["query"];
+            if (query == null || query.NamespaceURI != MucNs.NsOwner)
+                throw new NotSupportedException("Erroneous response: " + iq);
+        }
+
         /// <summary>
         /// Allows owners and admins to grant privileges to an occupant.
         /// </summary>
@@ -378,6 +399,24 @@ namespace Sharp.Xmpp.Extensions
         /// This will fail if you do not have permissions.
         /// </summary>
         /// <param name="room">Chat room to query</param>
+        /// <returns>An enumerable collection of items of the XMPP entity
+        /// with the specified IRoom.</returns>
+        /// <exception cref="ArgumentNullException">The IRoom jid parameter
+        /// is null.</exception>
+        /// <exception cref="NotSupportedException">The query could not be
+        /// performed or the response was invalid.</exception>
+        private IEnumerable<Occupant> QueryOccupants(Jid room)
+        {
+            room.ThrowIfNull("room");
+            var items = QueryItems(room, Xml.Element("query", MucNs.NsRequestItems));
+            return items.Select(x => new Occupant(x.Jid, x.Affiliation, x.Role));
+        }
+
+        /// <summary>
+        /// Queries for occupants in a room,
+        /// This will fail if you do not have permissions.
+        /// </summary>
+        /// <param name="room">Chat room to query</param>
         /// <param name="affiliation">Queried user affiliation</param>
         /// <returns>An enumerable collection of items of the XMPP entity
         /// with the specified IRoom.</returns>
@@ -385,39 +424,14 @@ namespace Sharp.Xmpp.Extensions
         /// is null.</exception>
         /// <exception cref="NotSupportedException">The query could not be
         /// performed or the response was invalid.</exception>
-        private IEnumerable<Item> QueryOccupants(Jid room, Affiliation affiliation)
+        private IEnumerable<Occupant> QueryOccupants(Jid room, Affiliation affiliation)
         {
             room.ThrowIfNull("room");
             var queryElement = Xml.Element("query", MucNs.NsAdmin)
                 .Child(Xml.Element("item").Attr("affiliation", affiliation.ToString().ToLower()));
 
-            Iq iq = im.IqRequest(IqType.Get, room, im.Jid, queryElement);
-            if (iq.Type != IqType.Result)
-                throw new NotSupportedException("Could not query items: " + iq);
-            // Parse the result.
-            var query = iq.Data["query"];
-            if (query == null || query.NamespaceURI != MucNs.NsAdmin)
-                throw new NotSupportedException("Erroneous response: " + iq);
-            ISet<Item> items = new HashSet<Item>();
-            foreach (XmlElement e in query.GetElementsByTagName("item"))
-            {
-                string _jid = e.GetAttribute("jid"),
-                    _affiliation = e.GetAttribute("affiliation"),
-                    _nick = e.GetAttribute("nick"),
-                    _role = e.GetAttribute("role");
-                if (string.IsNullOrEmpty(_jid) | string.IsNullOrEmpty(_affiliation))
-                    continue;
-                try
-                {
-                    items.Add(new Item(_affiliation, _jid, _nick, _role));
-                }
-                catch (ArgumentException)
-                {
-                    // The JID is malformed, ignore the item.
-                }
-            }
-
-            return items;
+            var items = QueryItems(room, queryElement);
+            return items.Select(x => new Occupant(x.Jid, x.Affiliation, x.Role));
         }
 
         /// <summary>
@@ -432,39 +446,14 @@ namespace Sharp.Xmpp.Extensions
         /// is null.</exception>
         /// <exception cref="NotSupportedException">The query could not be
         /// performed or the response was invalid.</exception>
-        private IEnumerable<Item> QueryOccupants(Jid room, Role role)
+        private IEnumerable<Occupant> QueryOccupants(Jid room, Role role)
         {
             room.ThrowIfNull("room");
             var queryElement = Xml.Element("query", MucNs.NsAdmin)
                 .Child(Xml.Element("item").Attr("role", role.ToString().ToLower()));
 
-            Iq iq = im.IqRequest(IqType.Get, room, im.Jid, queryElement);
-            if (iq.Type != IqType.Result)
-                throw new NotSupportedException("Could not query items: " + iq);
-            // Parse the result.
-            var query = iq.Data["query"];
-            if (query == null || query.NamespaceURI != MucNs.NsAdmin)
-                throw new NotSupportedException("Erroneous response: " + iq);
-            ISet<Item> items = new HashSet<Item>();
-            foreach (XmlElement e in query.GetElementsByTagName("item"))
-            {
-                string _jid = e.GetAttribute("jid"),
-                    _affiliation = e.GetAttribute("affiliation"),
-                    _nick = e.GetAttribute("nick"),
-                    _role = e.GetAttribute("role");
-                if (string.IsNullOrEmpty(_jid) | string.IsNullOrEmpty(_affiliation))
-                    continue;
-                try
-                {
-                    items.Add(new Item(_affiliation, _jid, _nick, _role));
-                }
-                catch (ArgumentException)
-                {
-                    // The JID is malformed, ignore the item.
-                }
-            }
-
-            return items;
+            var items = QueryItems(room, queryElement);
+            return items.Select(x => new Occupant(x.Jid, x.Affiliation, x.Role));
         }
 
         /// <summary>
@@ -479,32 +468,51 @@ namespace Sharp.Xmpp.Extensions
         /// performed or the response was invalid.</exception>
         private IEnumerable<RoomInfoBasic> QueryRooms(Jid jid)
         {
+            var items = QueryItems(jid, Xml.Element("query", MucNs.NsRequestItems));
+            return items.Select(x => new RoomInfoBasic(x.Jid, x.Name));
+        }
+
+        /// <summary>
+        /// Queries the XMPP entity with the specified JID for item information.
+        /// </summary>
+        /// <param name="jid">The JID of the XMPP entity to query.</param>
+        /// <param name="query">Query object that will be sent 
+        /// in the Iq request to the service.</param>
+        /// <returns>An enumerable collection of items of the XMPP entity
+        /// with the specified JID.</returns>
+        /// <exception cref="ArgumentNullException">The jid parameter
+        /// is null.</exception>
+        /// <exception cref="NotSupportedException">The query could not be
+        /// performed or the response was invalid.</exception>
+        private IEnumerable<Item> QueryItems(Jid jid, XmlElement query)
+        {
             jid.ThrowIfNull("jid");
-            Iq iq = im.IqRequest(IqType.Get, jid, im.Jid,
-                Xml.Element("query", MucNs.NsRequestItems));
+            query.ThrowIfNull("query");
+            Iq iq = im.IqRequest(IqType.Get, jid, im.Jid, query);
             if (iq.Type != IqType.Result)
                 throw new NotSupportedException("Could not query items: " + iq);
             // Parse the result.
-            var query = iq.Data["query"];
-            if (query == null || query.NamespaceURI != MucNs.NsRequestItems)
+            var response = iq.Data["query"];
+            if (response == null || response.NamespaceURI != MucNs.NsRequestItems)
                 throw new NotSupportedException("Erroneous response: " + iq);
-            ISet<RoomInfoBasic> items = new HashSet<RoomInfoBasic>();
-            foreach (XmlElement e in query.GetElementsByTagName("item"))
+            ISet<Item> items = new HashSet<Item>();
+            foreach (XmlElement e in response.GetElementsByTagName("item"))
             {
                 string _jid = e.GetAttribute("jid"), node = e.GetAttribute("node"),
-                    name = e.GetAttribute("name");
+                    name = e.GetAttribute("name"), nick = e.GetAttribute("nick"),
+                    affiliation = e.GetAttribute("affiliation"), role = e.GetAttribute("role");
                 if (String.IsNullOrEmpty(_jid))
                     continue;
                 try
                 {
-                    Jid itemJid = new Jid(_jid);
-                    items.Add(new RoomInfoBasic(itemJid, name));
+                    items.Add(new Item(_jid, node, name, nick, role, affiliation));
                 }
                 catch (ArgumentException)
                 {
                     // The JID is malformed, ignore the item.
                 }
             }
+
             return items;
         }
 
