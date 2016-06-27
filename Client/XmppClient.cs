@@ -1748,12 +1748,78 @@ namespace Sharp.Xmpp.Client
             groupChat.GetMessageLog(jid, option);
         }
 
-        public void GetRoomMembers(Jid chatRoom)
+        /// <summary>
+        /// Requests a list of occupants within the specific room.
+        /// </summary>
+        public IEnumerable<Occupant> GetRoomAllOccupants(Jid chatRoom)
         {
             AssertValid();
-            groupChat.GetMembers(chatRoom, Affiliation.Member);
+            return groupChat.GetMembers(chatRoom);
         }
 
+        /// <summary>
+        /// Requests a list of non-members within the specified room.
+        /// </summary>
+        public IEnumerable<Occupant> GetRoomStrangers(Jid chatRoom)
+        {
+            AssertValid();
+            return groupChat.GetMembers(chatRoom, Affiliation.None);
+        }
+
+        /// <summary>
+        /// Requests a list of room members within the specified room.
+        /// </summary>
+        public IEnumerable<Occupant> GetRoomMembers(Jid chatRoom)
+        {
+            AssertValid();
+            return groupChat.GetMembers(chatRoom, Affiliation.Member);
+        }
+
+        /// <summary>
+        /// Requests a list of room owners within the specified room.
+        /// </summary>
+        public IEnumerable<Occupant> GetRoomOwners(Jid chatRoom)
+        {
+            AssertValid();
+            return groupChat.GetMembers(chatRoom, Affiliation.Owner);
+        }
+
+        /// <summary>
+        /// Requests a list of people banned within the specified room.
+        /// </summary>
+        public IEnumerable<Occupant> GetRoomBanList(Jid chatRoom)
+        {
+            AssertValid();
+            return groupChat.GetMembers(chatRoom, Affiliation.Outcast);
+        }
+
+        /// <summary>
+        /// Requests a list of visitors within the specified room.
+        /// </summary>
+        public IEnumerable<Occupant> GetRoomVisitors(Jid chatRoom)
+        {
+            AssertValid();
+            return groupChat.GetMembers(chatRoom, Role.Visitor);
+        }
+
+        /// <summary>
+        /// Requests a list of occupants with a voice privileges within the specified room.
+        /// </summary>
+        public IEnumerable<Occupant> GetRoomVoiceList(Jid chatRoom)
+        {
+            AssertValid();
+            return groupChat.GetMembers(chatRoom, Role.Participant);
+        }
+
+        /// <summary>
+        /// Requests a list of moderators within the specified room.
+        /// </summary>
+        public IEnumerable<Occupant> GetRoomModerators(Jid chatRoom)
+        {
+            AssertValid();
+            return groupChat.GetMembers(chatRoom, Role.Moderator);
+        }
+        
         /// <summary>
         /// Allows moderators to kick an occupant from the room.
         /// </summary>

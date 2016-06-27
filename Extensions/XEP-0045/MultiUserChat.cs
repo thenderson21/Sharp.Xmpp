@@ -195,7 +195,10 @@ namespace Sharp.Xmpp.Extensions
             im.SendPresence(new Im.Presence(msg));
         }
 
-        public void GetMembers(Jid room)
+        /// <summary>
+        /// Requests a list of occupants within a specific room.
+        /// </summary>
+        public IEnumerable<Occupant> GetMembers(Jid room)
         {
             return QueryOccupants(room);
         }
