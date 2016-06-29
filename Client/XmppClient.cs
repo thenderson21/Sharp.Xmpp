@@ -487,6 +487,21 @@ namespace Sharp.Xmpp.Client
         }
 
         /// <summary>
+        /// The event that is raised when an invite to a group chat is received.
+        /// </summary>
+        public event EventHandler<GroupInviteEventArgs> GroupInviteReceived
+        {
+            add
+            {
+                groupChat.InviteReceived += value;
+            }
+            remove
+            {
+                groupChat.InviteReceived -= value;
+            }
+        }
+
+        /// <summary>
         /// The event that is raised periodically for every file-transfer operation to
         /// inform subscribers of the progress of the operation.
         /// </summary>

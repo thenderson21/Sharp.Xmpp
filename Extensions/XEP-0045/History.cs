@@ -18,7 +18,7 @@ namespace Sharp.Xmpp.Extensions
             sinceAttribute = "since";
 
         /// <summary>
-        /// 
+        /// Initialises a MUC message history request object.
         /// </summary>
         /// <param name="to"></param>
         /// <param name="from"></param>
@@ -31,7 +31,7 @@ namespace Sharp.Xmpp.Extensions
         }
 
         /// <summary>
-        /// 
+        /// Initialises a MUC message history request object.
         /// </summary>
         /// <param name="to"></param>
         /// <param name="from"></param>

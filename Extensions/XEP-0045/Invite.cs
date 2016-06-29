@@ -16,7 +16,8 @@ namespace Sharp.Xmpp.Extensions
             inviteTag = "invite",
             reasonTag = "reason",
             passwordTag = "password",
-            toAttribute = "to";
+            toAttribute = "to",
+            fromAttribute = "from";
 
         /// <summary>
         /// Initialises a group chat invite.
@@ -30,16 +31,20 @@ namespace Sharp.Xmpp.Extensions
             : base(room, from, Xml.Element(xTag, MucNs.NsUser))
         {
             XElement.Child(Xml.Element(inviteTag).Child(Xml.Element(reasonTag)));
-            To = to;
-            ChatRoom = room;
+            SendTo = to;
             Reason = reason;
             Password = password;
+        }
+
+        internal Invite(Core.Message message)
+            : base(message.Data)
+        {
         }
 
         /// <summary>
         /// JID of the user the invite is intended to be send to.
         /// </summary>
-        public new Jid To
+        public Jid SendTo
         {
             get
             {
@@ -59,22 +64,24 @@ namespace Sharp.Xmpp.Extensions
         }
 
         /// <summary>
-        /// JID of the chat room specified in the invitation.
+        /// JID of the user the invite has been sent from.
         /// </summary>
-        public Jid ChatRoom
+        public Jid ReceivedFrom
         {
             get
             {
-                string v = element.GetAttribute(toAttribute);
+                XmlElement node = InviteElement;
+                string v = node == null ? null : node.GetAttribute(fromAttribute);
+
                 return String.IsNullOrEmpty(v) ? null : new Jid(v);
             }
 
-            set
+            private set
             {
                 if (value == null)
-                    element.RemoveAttribute(toAttribute);
+                    InviteElement.RemoveAttribute(fromAttribute);
                 else
-                    element.SetAttribute(toAttribute, value.ToString());
+                    InviteElement.SetAttribute(fromAttribute, value.ToString());
             }
         }
 
@@ -131,5 +138,11 @@ namespace Sharp.Xmpp.Extensions
         private XmlElement ReasonElement { get { return GetNode(xTag, inviteTag, reasonTag); } }
 
         private XmlElement PasswordElement { get { return GetNode(xTag, passwordTag); } }
+
+        internal static bool IsElement(Core.Message message)
+        {
+            Invite temp = new Invite(message);
+            return temp.InviteElement != null;
+        }
     }
 }

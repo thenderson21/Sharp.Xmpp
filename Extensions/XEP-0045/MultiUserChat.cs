@@ -47,6 +47,8 @@ namespace Sharp.Xmpp.Extensions
 
         public event EventHandler<GroupPresenceEventArgs> PrescenceChanged;
 
+        public event EventHandler<GroupInviteEventArgs> InviteReceived;
+
         public RegistrationCallback VoiceRequested;
 
         public override void Initialize()
@@ -95,10 +97,11 @@ namespace Sharp.Xmpp.Extensions
                         break;                       
                 }
             }
-            else if (xElement != null && xElement.NamespaceURI == MucNs.NsUser)
-            { 
+            else if (Invite.IsElement(stanza))
+            {
                 // Incoming chat room invite
-                
+                var invite = new Invite(stanza);
+                InviteReceived.Raise(this, new GroupInviteEventArgs(invite));
             }
 
             // Any message with a body can be managed by the IM extension
