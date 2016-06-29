@@ -1843,6 +1843,18 @@ namespace Sharp.Xmpp.Client
         }
 
         /// <summary>
+        /// Asks the chat service to invite the specified user to the chat room you specify.
+        /// </summary>
+        /// <param name="to">user you intend to invite to chat room.</param>
+        /// <param name="message">message you want to send to the user.</param>
+        /// <param name="chatRoom">Jid of the chat room.</param>
+        /// <param name="password">Password if any.</param>
+        public void SendInvite(Jid to, Jid chatRoom, string message, string password = null)
+        {
+            groupChat.SendInvite(to, chatRoom, message, password);
+        }
+
+        /// <summary>
         /// Closes the connection with the XMPP server. This automatically disposes
         /// of the object.
         /// </summary>

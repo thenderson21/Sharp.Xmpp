@@ -71,6 +71,7 @@ namespace Sharp.Xmpp.Extensions
 
             XmlElement xElement = stanza.Data["x"];
             if (xElement != null && xElement.NamespaceURI == MucNs.NsXData)
+            {
                 switch (xElement.FirstChild.Value)
                 {
                     default:
@@ -91,8 +92,14 @@ namespace Sharp.Xmpp.Extensions
                         // 9.9 Approving Registration Requests
                         // I'm unsure on how to implement this.
                         // return true;
-                        break;
+                        break;                       
                 }
+            }
+            else if (xElement != null && xElement.NamespaceURI == MucNs.NsUser)
+            { 
+                // Incoming chat room invite
+                
+            }
 
             // Any message with a body can be managed by the IM extension
             return false;
@@ -301,6 +308,18 @@ namespace Sharp.Xmpp.Extensions
             Iq iq = im.IqRequest(IqType.Set, room, im.Jid, query);
             if (iq.Type != IqType.Result)
                 throw new NotSupportedException("Could not query features: " + iq);
+        }
+
+        /// <summary>
+        /// Asks the chat service to invite the specified user to the chat room you specify.
+        /// </summary>
+        /// <param name="to">user you intend to invite to chat room.</param>
+        /// <param name="message">message you want to send to the user.</param>
+        /// <param name="room">Jid of the chat room.</param>
+        /// <param name="password">Password if any.</param>
+        public void SendInvite(Jid to, Jid room, string message, string password = null)
+        {
+            SendMessage(new Invite(to, room, message, password));
         }
 
         /// <summary>

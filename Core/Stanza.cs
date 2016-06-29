@@ -16,6 +16,15 @@ namespace Sharp.Xmpp.Core
         protected XmlElement element;
 
         /// <summary>
+        /// The tag name of the stanza's root element
+        /// Allows the element tag name to be overridden.
+        /// </summary>
+        protected virtual string RootElementName
+        {
+            get { return GetType().Name.ToLowerInvariant(); }
+        }
+
+        /// <summary>
         /// Specifies the JID of the intended recipient for the stanza.
         /// </summary>
         public Jid To
@@ -133,8 +142,7 @@ namespace Sharp.Xmpp.Core
             Jid from = null, string id = null, CultureInfo language = null,
             params XmlElement[] data)
         {
-            string name = GetType().Name.ToLowerInvariant();
-            element = Xml.Element(name, @namespace);
+            element = Xml.Element(RootElementName, @namespace);
             To = to;
             From = from;
             Id = id;
@@ -166,6 +174,29 @@ namespace Sharp.Xmpp.Core
         public override string ToString()
         {
             return element.ToXmlString();
+        }
+
+        /// <summary>
+        /// Recursively traverses the element using the given node list.
+        /// </summary>
+        /// <param name="nodeList">Tree of element name tags.</param>
+        /// <returns>null or with the requested xml element.</returns>
+        protected XmlElement GetNode(params string[] nodeList)
+        {
+            return GetNode(element, 0, nodeList);
+        }
+
+        /// <summary>
+        /// Recursively traverses the element using the given node list.
+        /// </summary>
+        /// <param name="node">Current node in the node list.</param>
+        /// <param name="depth">Current depth in the node list.</param>
+        /// <param name="nodeList">Tree of element name tags.</param>
+        /// <returns>null or with the requested xml element.</returns>
+        private XmlElement GetNode(XmlElement node, int depth, params string[] nodeList)
+        {
+            XmlElement child = node[nodeList[depth]];
+            return child == null || depth == nodeList.Length - 1 ? child : GetNode(child, depth + 1, nodeList);
         }
     }
 }
