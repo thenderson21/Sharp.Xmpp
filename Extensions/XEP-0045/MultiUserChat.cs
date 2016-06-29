@@ -49,6 +49,8 @@ namespace Sharp.Xmpp.Extensions
 
         public event EventHandler<GroupInviteEventArgs> InviteReceived;
 
+        public event EventHandler<GroupInviteDeclinedEventArgs> InviteWasDeclined;
+
         public RegistrationCallback VoiceRequested;
 
         public override void Initialize()
@@ -102,6 +104,14 @@ namespace Sharp.Xmpp.Extensions
                 // Incoming chat room invite
                 var invite = new Invite(stanza);
                 InviteReceived.Raise(this, new GroupInviteEventArgs(invite));
+                return true;
+            }
+            else if (InviteDeclined.IsElement(stanza))
+            {
+                // Incoming chat room invite
+                var invite = new InviteDeclined(stanza);
+                InviteWasDeclined.Raise(this, new GroupInviteDeclinedEventArgs(invite));
+                return true;
             }
 
             // Any message with a body can be managed by the IM extension
@@ -319,6 +329,16 @@ namespace Sharp.Xmpp.Extensions
         public void SendInvite(Jid to, Jid room, string message, string password = null)
         {
             SendMessage(new Invite(to, room, message, password));
+        }
+
+        /// <summary>
+        /// Responds to a group chat invitation with a decline message.
+        /// </summary>
+        /// <param name="invite">Original group chat invitation.</param>
+        /// <param name="reason">Reason for declining.</param>
+        public void DeclineInvite(Invite invite, string reason)
+        {
+            SendMessage(new InviteDeclined(invite, reason));
         }
 
         /// <summary>

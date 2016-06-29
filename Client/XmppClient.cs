@@ -502,6 +502,21 @@ namespace Sharp.Xmpp.Client
         }
 
         /// <summary>
+        /// The event that is raised when an invite to a group chat is declined.
+        /// </summary>
+        public event EventHandler<GroupInviteDeclinedEventArgs> GroupInviteDeclined
+        {
+            add
+            {
+                groupChat.InviteWasDeclined += value;
+            }
+            remove
+            {
+                groupChat.InviteWasDeclined -= value;
+            }
+        }
+
+        /// <summary>
         /// The event that is raised periodically for every file-transfer operation to
         /// inform subscribers of the progress of the operation.
         /// </summary>
@@ -1866,6 +1881,16 @@ namespace Sharp.Xmpp.Client
         public void SendInvite(Jid to, Jid chatRoom, string message, string password = null)
         {
             groupChat.SendInvite(to, chatRoom, message, password);
+        }
+
+        /// <summary>
+        /// Responds to a group chat invitation with a decline message.
+        /// </summary>
+        /// <param name="invite">Original group chat invitation.</param>
+        /// <param name="reason">Reason for declining.</param>
+        public void DeclineInvite(Invite invite, string reason)
+        {
+            groupChat.DeclineInvite(invite, reason);
         }
 
         /// <summary>

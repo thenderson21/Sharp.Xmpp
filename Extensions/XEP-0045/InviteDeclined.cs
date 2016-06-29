@@ -9,34 +9,29 @@ namespace Sharp.Xmpp.Extensions
     /// <summary>
     /// Implements MUC Mediated Invitation as described in XEP-0045.
     /// </summary>
-    public class Invite : Message
+    public class InviteDeclined : Message
     {
         private const string rootTag = "message",
             xTag = "x",
-            inviteTag = "invite",
+            inviteTag = "decline",
             reasonTag = "reason",
-            passwordTag = "password",
             toAttribute = "to",
             fromAttribute = "from";
 
         /// <summary>
         /// Initialises a group chat invite.
         /// </summary>
-        /// <param name="to">User you intend to invite to chat room.</param>
-        /// /// <param name="from">User sending the invitation.</param>
+        /// <param name="invite">Invitation to a chat room.</param>
         /// <param name="reason">Message included with the invitation.</param>
-        /// <param name="room">Jid of the chat room.</param>
-        /// <param name="password">(optional) Password.</param>
-        public Invite(Jid to, Jid from, Jid room, string reason, string password = null)
-            : base(room, from, Xml.Element(xTag, MucNs.NsUser))
+        public InviteDeclined(Invite invite, string reason)
+            : base(invite.From, invite.To, Xml.Element(xTag, MucNs.NsUser))
         {
             XElement.Child(Xml.Element(inviteTag).Child(Xml.Element(reasonTag)));
-            SendTo = to;
+            SendTo = invite.ReceivedFrom;
             Reason = reason;
-            Password = password;
         }
 
-        internal Invite(Core.Message message)
+        internal InviteDeclined(Core.Message message)
             : base(message.Data)
         {
         }
@@ -102,30 +97,7 @@ namespace Sharp.Xmpp.Extensions
                     ReasonElement.Text(value);
             }
         }
-
-        /// <summary>
-        /// (Optional) password of the chat room in the invitation.
-        /// </summary>
-        public string Password
-        {
-            get
-            {
-                XmlElement node = PasswordElement;
-                return node == null ? null : node.InnerText;
-            }
-
-            set
-            {
-                XmlElement node = PasswordElement;
-
-                if(node != null)
-                    XElement.RemoveChild(node);
-
-                if (!string.IsNullOrEmpty(value))
-                    XElement.Child(Xml.Element(passwordTag).Text(value));
-            }
-        }
-
+        
         /// <summary>
         /// The tag name of the stanza's root element
         /// </summary>
@@ -137,11 +109,9 @@ namespace Sharp.Xmpp.Extensions
 
         private XmlElement ReasonElement { get { return GetNode(xTag, inviteTag, reasonTag); } }
 
-        private XmlElement PasswordElement { get { return GetNode(xTag, passwordTag); } }
-
         internal static bool IsElement(Core.Message message)
         {
-            Invite temp = new Invite(message);
+            InviteDeclined temp = new InviteDeclined(message);
             return temp.XElement.NamespaceURI == MucNs.NsUser && temp.InviteElement != null;
         }
     }
