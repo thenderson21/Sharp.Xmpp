@@ -1740,12 +1740,11 @@ namespace Sharp.Xmpp.Client
         /// <summary>
         /// Sends a request to get X previous messages.
         /// </summary>
-        /// <param name="jid">target room/group member</param>
         /// <param name="option">How long to look back</param>
-        public void GetGroupChatLog(Jid jid, History option)
+        public void GetGroupChatLog(History option)
         {
             AssertValid();
-            groupChat.GetMessageLog(jid, option);
+            groupChat.GetMessageLog(option);
         }
 
         /// <summary>

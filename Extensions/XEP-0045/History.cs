@@ -1,41 +1,46 @@
 ﻿using System;
 using System.Xml;
+using Sharp.Xmpp.Core;
 
 namespace Sharp.Xmpp.Extensions
 {
     /// <summary>
     /// Implements the message history request object as described in XEP-0045.
     /// </summary>
-    public class History
+    public class History : Presence
     {
-        private int? maxChars;
-        private int? maxStanzas;
-        private int? seconds;
-        private DateTime? since;
+        private const string rootTag = "presence",
+            xTag = "x",
+            historyTag = "history",
+            maxCharsAttribute = "maxchars",
+            maxStanzasAttribute = "maxstanzas",
+            secondsAttribute = "seconds",
+            sinceAttribute = "since";
 
         /// <summary>
-        /// Returns the history element used in presence messages for group chat.
+        /// 
         /// </summary>
-        public XmlElement Element
+        /// <param name="to"></param>
+        /// <param name="from"></param>
+        /// <param name="maxChars"></param>
+        public History(Jid to, Jid from, int maxChars = 0)
+            :base(to, from, null, null, Xml.Element(xTag, MucNs.NsMain))
         {
-            get
-            {
-                XmlElement element = Xml.Element("history");
+            XElement.Child(Xml.Element(historyTag));
+            MaxChars = maxChars;
+        }
 
-                if (maxChars.HasValue)
-                    element.Attr("maxchars", maxChars.ToString());
-                else if (maxStanzas.HasValue)
-                    element.Attr("maxstanzas", maxStanzas.ToString());
-                else if (seconds.HasValue)
-                    element.Attr("seconds", seconds.ToString());
-                else if (since.HasValue)
-                    element.Attr("since", since.Value.ToUniversalTime()
-                        .ToString("yyyy-MM-ddTHH:mm:ssZ"));
-                else
-                    element.Attr("maxchars", "0");
-
-                return element;
-            }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="to"></param>
+        /// <param name="from"></param>
+        /// <param name="since"></param>
+        public History(Jid to, Jid from, DateTime since)
+            : base(to, from, null, null, Xml.Element(xTag, MucNs.NsMain))
+        {
+            XElement.Child(Xml.Element(historyTag));
+            Since = since;
         }
 
         /// <summary>
@@ -45,8 +50,16 @@ namespace Sharp.Xmpp.Extensions
         /// </summary>
         public int? MaxChars
         {
-            get { return maxChars; }
-            set { maxChars = value; }
+            get
+            {
+                return GetValueAsInteger(maxCharsAttribute);
+            }
+
+            set
+            {
+                string safeValue = SafeNumber(value);
+                ReplaceValue(maxCharsAttribute, safeValue);
+            }
         }
 
         /// <summary>
@@ -54,8 +67,16 @@ namespace Sharp.Xmpp.Extensions
         /// </summary>
         public int? MaxStanzas
         {
-            get { return maxStanzas; }
-            set { maxStanzas = value; }
+            get
+            {
+                return GetValueAsInteger(maxStanzasAttribute);
+            }
+
+            set
+            {
+                string safeValue = SafeNumber(value);
+                ReplaceValue(maxStanzasAttribute, safeValue);
+            }
         }
 
         /// <summary>
@@ -63,8 +84,16 @@ namespace Sharp.Xmpp.Extensions
         /// </summary>
         public int? Seconds
         {
-            get { return seconds; }
-            set { seconds = value; }
+            get
+            {
+                return GetValueAsInteger(secondsAttribute);
+            }
+
+            set
+            {
+                string safeValue = SafeNumber(value);
+                ReplaceValue(secondsAttribute, safeValue);
+            }
         }
 
         /// <summary>
@@ -72,8 +101,90 @@ namespace Sharp.Xmpp.Extensions
         /// </summary>
         public DateTime? Since
         {
-            get { return since; }
-            set { since = value; }
+            get
+            {
+                return GetValueAsDateTime(sinceAttribute);
+            }
+
+            set
+            {
+                string safeValue = null;
+
+                if(value.HasValue)
+                    safeValue = value.Value
+                        .ToUniversalTime()
+                        .ToString("yyyy-MM-ddTHH:mm:ssZ");
+
+                ReplaceValue(sinceAttribute, safeValue);
+            }
+        }
+
+        /// <summary>
+        /// The tag name of the stanza's root element
+        /// </summary>
+        protected override string RootElementName { get { return rootTag; } }
+
+        private XmlElement XElement { get { return element[xTag]; } }
+
+        private XmlElement HistoryElement { get { return GetNode(xTag, historyTag); } }
+
+        /// <summary>
+        /// Prevents the user from entering numbers less than zero.
+        /// </summary>
+        /// <param name="number">user input.</param>
+        /// <returns>null or any number equal to or greater than zero.</returns>
+        private string SafeNumber(int? number)
+        {
+            string result = null;
+
+            if (number != null)
+            {
+                int? safeNumber = null;
+
+                if (number < 0)
+                    safeNumber = 0;
+                else
+                    safeNumber = number;
+
+                result = safeNumber.ToString();
+            }
+
+            return result;
+        }
+
+        private int? GetValueAsInteger(string attributeName)
+        {
+            XmlElement node = HistoryElement;
+            string v = node == null ? null : node.GetAttribute(attributeName);
+
+            int? result = null;
+            if (!string.IsNullOrEmpty(v))
+                result = int.Parse(v);
+
+            return result;
+        }
+
+        private DateTime? GetValueAsDateTime(string attributeName)
+        {
+            XmlElement node = HistoryElement;
+            string v = node == null ? null : node.GetAttribute(attributeName);
+
+            DateTime? result = null;
+            if (!string.IsNullOrEmpty(v))
+                result = DateTime.Parse(v);
+
+            return result;
+        }
+
+        private void ReplaceValue(string attributeName, string value)
+        {
+            const string zero = "0";
+
+            HistoryElement.RemoveAllAttributes();
+            if (value == null)
+                HistoryElement.SetAttribute(maxCharsAttribute, zero);
+            else
+                HistoryElement.SetAttribute(attributeName, value);
         }
     }
 }

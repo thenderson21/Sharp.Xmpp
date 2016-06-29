@@ -193,13 +193,9 @@ namespace Sharp.Xmpp.Extensions
         /// <summary>
         /// Requests previous chat room messages.
         /// </summary>
-        public void GetMessageLog(Jid target, History options)
+        public void GetMessageLog(History options)
         {
-            XmlElement elem = Xml.Element("x", MucNs.NsMain);
-            elem.Child(options.Element);
-            var msg = new Core.Presence(target, im.Jid, null, null, elem);
-
-            im.SendPresence(new Im.Presence(msg));
+            im.SendPresence(new Im.Presence(options));
         }
 
         /// <summary>
@@ -606,7 +602,7 @@ namespace Sharp.Xmpp.Extensions
             return fields;
         }
 
-        public void SendMessage(Core.Message message)
+        private void SendMessage(Core.Message message)
         {
             im.SendMessage(new Im.Message(message));
         }
