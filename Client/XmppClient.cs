@@ -1748,14 +1748,15 @@ namespace Sharp.Xmpp.Client
         }
 
         /// <summary>
-        /// Joins or creates new room using the specified room
+        /// Joins or creates new room using the specified room.
         /// </summary>
-        /// <param name="chatRoom">Room Identifier</param>
-        /// <param name="nickname">Desired Nickname</param>
-        public void JoinRoom(Jid chatRoom, string nickname)
+        /// <param name="chatRoom">Chat room</param>
+        /// <param name="nickname">Desired nickname</param>
+        /// <param name="password">(Optional) Password</param>
+        public void JoinRoom(Jid chatRoom, string nickname, string password = null)
         {
             AssertValid();
-            groupChat.JoinRoom(chatRoom, nickname);
+            groupChat.JoinRoom(chatRoom, nickname, password);
         }
 
         /// <summary>

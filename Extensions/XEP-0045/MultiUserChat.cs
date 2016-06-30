@@ -185,9 +185,16 @@ namespace Sharp.Xmpp.Extensions
         /// <summary>
         /// Joins or creates new room using the specified room.
         /// </summary>
-        public void JoinRoom(Jid jid, string nickname)
+        /// <param name="jid">Chat room</param>
+        /// <param name="nickname">Desired nickname</param>
+        /// <param name="password">(Optional) Password</param>
+        public void JoinRoom(Jid jid, string nickname, string password = null)
         {
             XmlElement elem = Xml.Element("x", MucNs.NsMain);
+
+            if (!string.IsNullOrEmpty(password))
+                elem.Child(Xml.Element("password").Text(password));
+
             Jid joinRequest = new Jid(jid.Domain, jid.Node, nickname);
             var msg = new Im.Presence(joinRequest, im.Jid, PresenceType.Available, null, null, elem);
             im.SendPresence(msg);
