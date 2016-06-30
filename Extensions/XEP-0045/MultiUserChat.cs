@@ -51,7 +51,7 @@ namespace Sharp.Xmpp.Extensions
 
         public event EventHandler<GroupInviteDeclinedEventArgs> InviteWasDeclined;
 
-        public event EventHandler<GroupErrorEventArgs> PresenceError;
+        public event EventHandler<GroupErrorEventArgs> MucErrorResponse;
 
         public RegistrationCallback VoiceRequested;
 
@@ -62,19 +62,40 @@ namespace Sharp.Xmpp.Extensions
 
         public bool Input(Im.Message stanza)
         {
-            // Things that could happen here:
-            // Receive Registration Request
-            // Receive Voice Request
-            // Group Chat Message 
-            // Group Chat History
-            // Subject Change
+            if (MucError.IsError(stanza))
+            {
+                // Unable to send a message... many reasons
+                var error = new MucError(stanza);
+                MucErrorResponse?.Raise(this, new GroupErrorEventArgs(error));
+                return true;
+            }
 
+            if (Invite.IsElement(stanza))
+            {
+                // Incoming chat room invite
+                var invite = new Invite(stanza);
+                InviteReceived.Raise(this, new GroupInviteEventArgs(invite));
+                return true;
+            }
+
+            if (InviteDeclined.IsElement(stanza))
+            {
+                // Chat room invite was declined
+                var invite = new InviteDeclined(stanza);
+                InviteWasDeclined.Raise(this, new GroupInviteDeclinedEventArgs(invite));
+                return true;
+            }
+            
             if (stanza.Subject != null)
             {
+                // Subject change
                 SubjectChanged.Raise(this, new Im.MessageEventArgs(stanza.From, stanza));
                 return true;
             }
 
+            // Things that could happen here:
+            // Receive Registration Request
+            // Receive Voice Request
             XmlElement xElement = stanza.Data["x"];
             if (xElement != null && xElement.NamespaceURI == MucNs.NsXData)
             {
@@ -101,41 +122,26 @@ namespace Sharp.Xmpp.Extensions
                         break;                       
                 }
             }
-            else if (Invite.IsElement(stanza))
-            {
-                // Incoming chat room invite
-                var invite = new Invite(stanza);
-                InviteReceived.Raise(this, new GroupInviteEventArgs(invite));
-                return true;
-            }
-            else if (InviteDeclined.IsElement(stanza))
-            {
-                // Incoming chat room invite
-                var invite = new InviteDeclined(stanza);
-                InviteWasDeclined.Raise(this, new GroupInviteDeclinedEventArgs(invite));
-                return true;
-            }
 
             // Any message with a body can be managed by the IM extension
+            // Such as Group Chat Message & Group Chat History
             return false;
         }
 
         public bool Input(Im.Presence stanza)
         {
-            // Things that could happen here:
-            // Unable to join - No nickname specified / Duplicate nickname exists
-            // Service Sends Notice of Membership
-            // Service Passes Along Changed Presence
-            // Service Updates Nick
-            // Invitations Received/WasDeclined
-
             if (MucError.IsError(stanza))
             {
+                // Unable to join - No nickname specified / Duplicate nickname exists ... etc
                 var error = new MucError(stanza);
-                PresenceError?.Raise(this, new GroupErrorEventArgs(error));
+                MucErrorResponse?.Raise(this, new GroupErrorEventArgs(error));
                 return true;
             }
 
+            // Things that could happen here:
+            // Service Sends Notice of Membership
+            // Service Passes Along Changed Presence
+            // Service Updates Nick
             XmlElement xElement = stanza.Data["x"];
             if (xElement != null && xElement.NamespaceURI == MucNs.NsUser)
             {

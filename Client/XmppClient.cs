@@ -540,11 +540,11 @@ namespace Sharp.Xmpp.Client
         {
             add
             {
-                groupChat.PresenceError += value;
+                groupChat.MucErrorResponse += value;
             }
             remove
             {
-                groupChat.PresenceError -= value;
+                groupChat.MucErrorResponse -= value;
             }
         }
 
