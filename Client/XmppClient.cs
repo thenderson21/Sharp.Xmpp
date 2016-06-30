@@ -368,6 +368,23 @@ namespace Sharp.Xmpp.Client
         }
 
         /// <summary>
+        /// A callback method to invoke when a request for voice is received
+        /// from another XMPP user.
+        /// </summary>
+        public RegistrationCallback VoiceRequestedInGroupChat
+        {
+            get
+            {
+                return groupChat.VoiceRequested;
+            }
+
+            set
+            {
+                groupChat.VoiceRequested = value;
+            }
+        }
+
+        /// <summary>
         /// The event that is raised when a status notification has been received.
         /// </summary>
         public event EventHandler<StatusEventArgs> StatusChanged
@@ -513,6 +530,21 @@ namespace Sharp.Xmpp.Client
             remove
             {
                 groupChat.InviteWasDeclined -= value;
+            }
+        }
+
+        /// <summary>
+        /// The event that is raised when the server responds with an error in relation to a group chat.
+        /// </summary>
+        public event EventHandler<GroupErrorEventArgs> GroupMucError
+        {
+            add
+            {
+                groupChat.PresenceError += value;
+            }
+            remove
+            {
+                groupChat.PresenceError -= value;
             }
         }
 

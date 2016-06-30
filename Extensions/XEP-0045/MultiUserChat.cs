@@ -51,6 +51,8 @@ namespace Sharp.Xmpp.Extensions
 
         public event EventHandler<GroupInviteDeclinedEventArgs> InviteWasDeclined;
 
+        public event EventHandler<GroupErrorEventArgs> PresenceError;
+
         public RegistrationCallback VoiceRequested;
 
         public override void Initialize()
@@ -126,6 +128,13 @@ namespace Sharp.Xmpp.Extensions
             // Service Passes Along Changed Presence
             // Service Updates Nick
             // Invitations Received/WasDeclined
+
+            if (MucError.IsError(stanza))
+            {
+                var error = new MucError(stanza);
+                PresenceError?.Raise(this, new GroupErrorEventArgs(error));
+                return true;
+            }
 
             XmlElement xElement = stanza.Data["x"];
             if (xElement != null && xElement.NamespaceURI == MucNs.NsUser)
