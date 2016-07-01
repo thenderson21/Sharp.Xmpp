@@ -350,7 +350,7 @@ namespace Sharp.Xmpp.Extensions
         /// <param name="password">Password if any.</param>
         public void SendInvite(Jid to, Jid room, string message, string password = null)
         {
-            SendMessage(new Invite(to, room, message, password));
+            SendMessage(new Invite(to, im.Jid, room, message, password));
         }
 
         /// <summary>
