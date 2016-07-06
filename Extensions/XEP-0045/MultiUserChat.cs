@@ -272,14 +272,37 @@ namespace Sharp.Xmpp.Extensions
         }
 
         /// <summary>
-        /// Allows visitors to request membership to a room.
+        /// Allows occupants to request privileges to a room.
         /// </summary>
-        public void RequestVoice(Jid room, SubmitForm form)
+        public void RequestPrivilige(Jid room, Role role)
         {
-            var xml = Xml.Element("x", MucNs.NsXData);
-            xml.Child(form.ToXmlElement());
+            if (role == Role.None)
+                return;
 
-            var message = new Core.Message(room, im.Jid, xml);
+            XmlElement formTypeValue = Xml.Element("value")
+                .Text(MucNs.NsRequest);
+
+            XmlElement formType = Xml.Element("field")
+                .Attr("var", "FORM_TYPE")
+                .Child(formTypeValue);
+
+            XmlElement requestedRoleValue = Xml.Element("value")
+                .Text(role.ToString().ToLowerInvariant());
+
+            XmlElement requestedRole = Xml.Element("field")
+                .Attr("var", MucNs.Role)
+                .Attr("type", "list-single")
+                .Attr("label", "Requested Role")
+                .Child(requestedRoleValue);
+
+            DataField[] fields = 
+            {
+                new DataField(formType),
+                new DataField(requestedRole)
+            };
+
+            SubmitForm form = new SubmitForm(fields);
+            var message = new Core.Message(room, im.Jid, form.ToXmlElement());
             SendMessage(message);
         }
 
