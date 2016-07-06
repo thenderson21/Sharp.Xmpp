@@ -59,16 +59,16 @@ namespace Sharp.Xmpp.Extensions
         {
             get
             {
-                const char allDashses = '-';
+                const string allDashses = "-";
 
                 // It's possible for the error tag to be either inside or outside the x tag.
-                string nodeName = ErrorNode?.FirstChild?.Name.Remove(allDashses);
+                string nodeName = ErrorNode?.FirstChild?.Name?.Replace(allDashses, string.Empty);
 
                 ErrorCondition reason;
                 const bool ignoreCase = true;
 
                 // It should always parse, otherwise the message doesn't meet the protocol.
-                if (!string.IsNullOrEmpty(nodeName) || !Enum.TryParse(nodeName, ignoreCase, out reason))
+                if (string.IsNullOrEmpty(nodeName) || !Enum.TryParse(nodeName, ignoreCase, out reason))
                     reason = ErrorCondition.BadRequest;
 
                 return reason;

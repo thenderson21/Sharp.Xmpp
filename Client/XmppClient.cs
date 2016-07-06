@@ -1927,6 +1927,14 @@ namespace Sharp.Xmpp.Client
         }
 
         /// <summary>
+        /// Allows visitors to request membership to a room.
+        /// </summary>
+        public void RequestVoice(Jid chatRoom)
+        {
+            groupChat.RequestPrivilige(chatRoom, Role.Participant);
+        }
+
+        /// <summary>
         /// Closes the connection with the XMPP server. This automatically disposes
         /// of the object.
         /// </summary>
