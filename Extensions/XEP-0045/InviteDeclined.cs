@@ -112,7 +112,7 @@ namespace Sharp.Xmpp.Extensions
         internal static bool IsElement(Core.Message message)
         {
             InviteDeclined temp = new InviteDeclined(message);
-            return temp.XElement.NamespaceURI == MucNs.NsUser && temp.InviteElement != null;
+            return temp?.XElement?.NamespaceURI == MucNs.NsUser && temp?.InviteElement != null;
         }
     }
 }
