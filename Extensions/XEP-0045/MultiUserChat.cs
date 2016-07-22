@@ -128,52 +128,57 @@ namespace Sharp.Xmpp.Extensions
             return false;
         }
 
-        public bool Input(Im.Presence stanza)
-        {
-            if (MucError.IsError(stanza))
-            {
-                // Unable to join - No nickname specified / Duplicate nickname exists ... etc
-                var error = new MucError(stanza);
-                MucErrorResponse?.Raise(this, new GroupErrorEventArgs(error));
-                return true;
-            }
+        public bool Input (Im.Presence stanza)
+		{
+			if (MucError.IsError (stanza)) {
+				// Unable to join - No nickname specified / Duplicate nickname exists ... etc
+				var error = new MucError (stanza);
+				MucErrorResponse?.Raise (this, new GroupErrorEventArgs (error));
+				return true;
+			}
 
-            // Things that could happen here:
-            // Service Sends Notice of Membership
-            // Service Passes Along Changed Presence
-            // Service Updates Nick
-            XmlElement xElement = stanza.Data["x"];
-            if (xElement != null && xElement.NamespaceURI == MucNs.NsUser)
-            {
-                Occupant person = null;
-                foreach (XmlElement item in xElement.GetElementsByTagName("item"))
-                {
-                    // There is only every one item in a message here but, 
-                    // I don't have a better way of getting the first element as an element, not a node.
-                    person = new Occupant(
-                        item.GetAttribute("jid"),
-                        item.GetAttribute("affiliation"),
-                        item.GetAttribute("role"));
-                }
+			// Things that could happen here:
+			// Service Sends Notice of Membership
+			// Service Passes Along Changed Presence
+			// Service Updates Nick
+			XmlElement xElement = stanza.Data ["x"];
+			if (xElement != null && xElement.NamespaceURI == MucNs.NsUser) {
+				Occupant person = null;
+				foreach (XmlElement item in xElement.GetElementsByTagName ("item")) {
+					// There is only ever one item in a message here but, 
+					// I don't have a better way of getting the first element as an element, not a node.
+					var itemJid = item.GetAttribute ("jid");
+					var itemAffiliation = item.GetAttribute ("affiliation");
+					var itemRole = item.GetAttribute ("role");
+					if (!String.IsNullOrWhiteSpace (itemJid) && !String.IsNullOrWhiteSpace (itemAffiliation) &&
+							!String.IsNullOrWhiteSpace (itemRole)) {
+						person = new Occupant (
+						   item.GetAttribute ("jid"),
+						   item.GetAttribute ("affiliation"),
+						   item.GetAttribute ("role"));
+					}
+				}
 
-                IList<MucStatusType> statusCodeList = new List<MucStatusType>();
-                foreach (XmlElement item in xElement.GetElementsByTagName("item"))
-                {
-                    string codeAttribute = item.GetAttribute("code");
-                    var code = (MucStatusType)Enum.Parse(typeof(MucStatusType), codeAttribute);
-                    statusCodeList.Add(code);
-                }
 
-                if (person != null)
-                {
-                    PrescenceChanged.Raise(this, new GroupPresenceEventArgs(person, statusCodeList));
-                    return true;
-                }
-            }
+				IList<MucStatusType> statusCodeList = new List<MucStatusType> ();
+				foreach (XmlElement item in xElement.GetElementsByTagName ("status")) {
+					string codeAttribute = item.GetAttribute ("code");
+					if (!string.IsNullOrWhiteSpace (codeAttribute)) {
+						var code = (MucStatusType)Enum.Parse (typeof (MucStatusType), codeAttribute);
+						statusCodeList.Add (code);
+					}
+				}
 
-            // Any message with an Availability status can be managed by the Presence extension
-            return false;
-        }
+
+				if (person != null) {
+					PrescenceChanged.Raise (this, new GroupPresenceEventArgs (person, statusCodeList));
+					return true;
+				}
+			}
+
+			// Any message with an Availability status can be managed by the Presence extension
+			return false;
+		}
 
         /// <summary>
         /// Returns a list of active public chat room messages.
